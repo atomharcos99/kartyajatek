@@ -45,7 +45,7 @@ int main(void)
         .y = 0.0f
     };
 
-    // The outline of the card (the texture will be scaled according of this rectangle's size)
+    // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
     Rectangle destinationRecsCard[numberOfCards];
     for(int i = 0; i < numberOfCards; i++){
         destinationRecsCard[i] = (Rectangle){
