@@ -9,6 +9,13 @@ typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY, ENDING } GameScreen;
 // Program main entry point
 //------------------------------------------------------------------------------------
 
+typedef struct Card {
+    Texture texture;
+    Rectangle outline;
+} Card;
+
+void drawPlayerHand(Card *);
+
 int main(void)
 {
     // Initialization
@@ -29,26 +36,24 @@ int main(void)
     float heightOfCards = 350.0f;
     float widthOfCards = 250.0f;
 
-    // TODO: MAKE A CARD STRUCT THAT HAS cardTextures, sourceRecsCard, destionationRecsCard (maybe even originCard?) AS MEMBERS
+    Card cardsOfPlayer[numberOfCards];
 
     // Loading the textures of the cards
-    Texture cardTextures[numberOfCards];
     for(int i = 0; i < numberOfCards; i++){
-        cardTextures[i] = LoadTexture(TextFormat("images/image_card%d.png", i));
+        cardsOfPlayer[i].texture = LoadTexture(TextFormat("images/image_card%d.png", i));
     }
 
     // The size and position of the texture in the file. Since all the card textures are the same size, we don't need an array of these.
     Rectangle sourceRecCard = {
-        .height = (float)cardTextures[0].height,
-        .width = (float)cardTextures[0].width,
+        .height = (float)cardsOfPlayer[0].texture.height,
+        .width = (float)cardsOfPlayer[0].texture.width,
         .x = 0.0f,
         .y = 0.0f
     };
 
     // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
-    Rectangle destinationRecsCard[numberOfCards];
     for(int i = 0; i < numberOfCards; i++){
-        destinationRecsCard[i] = (Rectangle){
+        cardsOfPlayer[i].outline = (Rectangle){
             .height = heightOfCards,
             .width = widthOfCards,
             .x = 0.0f + i * widthOfCards,
@@ -143,9 +148,11 @@ int main(void)
                 } break;
                 case GAMEPLAY:
                 {
-                    for(int i = 0; i < numberOfCards; i++) {
-                        DrawTexturePro(cardTextures[i], sourceRecCard, destinationRecsCard[i], originCard, 0.0f, WHITE);
-                    }
+                    // for(int i = 0; i < numberOfCards; i++) {
+                    //     DrawTexturePro(cardsOfPlayer[i].texture, sourceRecCard, cardsOfPlayer[i].outline, originCard, 0.0f, WHITE);
+                    // }
+                    // TODO: Draw the hand of the player with this function
+                    drawPlayerHand(cardsOfPlayer);
                 } break;
                 case ENDING:
                 {
@@ -171,4 +178,8 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     return 0;
+}
+
+void drawPlayerHand(Card *cardsOfPlayer){
+
 }
