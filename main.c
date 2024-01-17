@@ -11,10 +11,12 @@ typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY, ENDING } GameScreen;
 
 typedef struct Card {
     Texture texture;
+    Rectangle source;
     Rectangle outline;
+    Vector2 origin;
 } Card;
 
-void drawPlayerHand(Card *);
+void drawPlayerHand(Card *, int);
 
 int main(void)
 {
@@ -24,7 +26,7 @@ int main(void)
     const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-    ToggleFullscreen();
+    // ToggleFullscreen();
 
     GameScreen currentScreen = LOGO;
 
@@ -32,40 +34,56 @@ int main(void)
 
     int framesCounter = 0;          // Useful to count frames
 
-    int numberOfCards = 6;
-    float heightOfCards = 350.0f;
-    float widthOfCards = 250.0f;
+    int numberOfCards = 8;
+    float heightOfCards = 214.0f;
+    float widthOfCards = 131.0f;
 
     Card cardsOfPlayer[numberOfCards];
 
-    // Loading the textures of the cards
+    // Initializing the cards
     for(int i = 0; i < numberOfCards; i++){
+        // Loading the textures of the cards
         cardsOfPlayer[i].texture = LoadTexture(TextFormat("images/image_card%d.png", i));
-    }
 
-    // The size and position of the texture in the file. Since all the card textures are the same size, we don't need an array of these.
-    Rectangle sourceRecCard = {
-        .height = (float)cardsOfPlayer[0].texture.height,
-        .width = (float)cardsOfPlayer[0].texture.width,
-        .x = 0.0f,
-        .y = 0.0f
-    };
+        // The size and position of the texture in the file
+        cardsOfPlayer[i].source = (Rectangle){
+            .height = (float)cardsOfPlayer[i].texture.height,
+            .width = (float)cardsOfPlayer[i].texture.width,
+            .x = 0.0f,
+            .y = 0.0f
+        };
 
-    // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
-    for(int i = 0; i < numberOfCards; i++){
+        // This makes the cards to be drawned out with overlap
+        float shiftOfCardsInDeck = 0.8f;
+        // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
         cardsOfPlayer[i].outline = (Rectangle){
             .height = heightOfCards,
             .width = widthOfCards,
-            .x = 0.0f + i * widthOfCards,
+            .x = (float) ((screenWidth - numberOfCards * (widthOfCards * shiftOfCardsInDeck))/2 + i * (widthOfCards * shiftOfCardsInDeck)),
+            .y = (float)(screenHeight - heightOfCards)
+        };
+
+        // Shift the height of cards to match the pattern of holding cards in hand
+        int shiftUp = 5.0f;
+        int counter = 0;
+        for(int i = 0; i < numberOfCards; i++){
+            if(i < numberOfCards/2){
+                cardsOfPlayer[i].outline.y = cardsOfPlayer[i].outline.y - counter * shiftUp;
+                counter++;
+            } else if(i > numberOfCards/2) {
+                cardsOfPlayer[i].outline.y = cardsOfPlayer[i].outline.y - counter * shiftUp;
+                counter--;
+            } else {
+                cardsOfPlayer[i].outline.y = cardsOfPlayer[i].outline.y - counter * shiftUp;
+            }
+        }
+
+        // TODO: Found out what is this for
+        cardsOfPlayer[i].origin = (Vector2){
+            .x = 0.0f,
             .y = 0.0f
         };
     }
-
-    // TODO: Found out what is this for
-    Vector2 originCard = {
-        .x = 0.0f,
-        .y = 0.0f
-    };
 
     SetTargetFPS(60);               // Set desired framerate (frames-per-second)
     //--------------------------------------------------------------------------------------
@@ -148,11 +166,8 @@ int main(void)
                 } break;
                 case GAMEPLAY:
                 {
-                    // for(int i = 0; i < numberOfCards; i++) {
-                    //     DrawTexturePro(cardsOfPlayer[i].texture, sourceRecCard, cardsOfPlayer[i].outline, originCard, 0.0f, WHITE);
-                    // }
                     // TODO: Draw the hand of the player with this function
-                    drawPlayerHand(cardsOfPlayer);
+                    drawPlayerHand(cardsOfPlayer, numberOfCards);
                 } break;
                 case ENDING:
                 {
@@ -174,12 +189,22 @@ int main(void)
 
     // TODO: Unload all loaded data (textures, fonts, audio) here!
 
+    for (int i = 0; i < numberOfCards; i++)
+    {
+        UnloadTexture(cardsOfPlayer[i].texture);
+    }
+    
+
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     return 0;
 }
 
-void drawPlayerHand(Card *cardsOfPlayer){
-
+void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
+    float rotation = 0.0f;
+    for(int i = 0; i < numberOfCards; i++){
+        //cardsOfPlayer[i].outline.
+        DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, rotation, WHITE);
+    }
 }
