@@ -63,26 +63,25 @@ int main(void)
             .y = (float)(screenHeight - heightOfCards)
         };
 
-        // Shift the height of cards to match the pattern of holding cards in hand
-        int shiftUp = 5.0f;
-        int counter = 0;
-        for(int i = 0; i < numberOfCards; i++){
-            if(i < numberOfCards/2){
-                cardsOfPlayer[i].outline.y = cardsOfPlayer[i].outline.y - counter * shiftUp;
-                counter++;
-            } else if(i > numberOfCards/2) {
-                cardsOfPlayer[i].outline.y = cardsOfPlayer[i].outline.y - counter * shiftUp;
-                counter--;
-            } else {
-                cardsOfPlayer[i].outline.y = cardsOfPlayer[i].outline.y - counter * shiftUp;
-            }
-        }
-
         // TODO: Found out what is this for
         cardsOfPlayer[i].origin = (Vector2){
             .x = 0.0f,
             .y = 0.0f
         };
+    }
+
+    // Shift the height of cards to match the pattern of holding cards in hand
+    int shiftUp = 20.0f;
+    int counter = 0;
+    for (int i = 0; i < numberOfCards; i++) {
+        if (i < numberOfCards / 2) {
+            // Increase counter before the half-way point
+            counter++;
+        } else if(i > numberOfCards / 2){
+            // Decrease counter after the half-way point
+            counter--;
+        }
+        cardsOfPlayer[i].outline.y -= counter * shiftUp;
     }
 
     SetTargetFPS(60);               // Set desired framerate (frames-per-second)
