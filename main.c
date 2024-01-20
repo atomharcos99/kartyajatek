@@ -5,16 +5,16 @@
 //------------------------------------------------------------------------------------------
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY, ENDING } GameScreen;
 
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
-
 typedef struct Card {
     Texture texture;
     Rectangle source;
     Rectangle outline;
     Vector2 origin;
 } Card;
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
 
 void drawPlayerHand(Card *, int);
 
@@ -40,12 +40,12 @@ int main(void)
 
     Card cardsOfPlayer[numberOfCards];
 
-    // Initializing the cards
+    // Létrehozzuk a játékos kezeiben lévő kártyákat
     for(int i = 0; i < numberOfCards; i++){
-        // Loading the textures of the cards
+        // Betöltsük a kártyák textúráit
         cardsOfPlayer[i].texture = LoadTexture(TextFormat("images/image_card%d.png", i));
 
-        // The size and position of the texture in the file
+        // Meghatározzuk a textúrán belüli kirajzolandó terület pozícióját és méretét
         cardsOfPlayer[i].source = (Rectangle){
             .height = (float)cardsOfPlayer[i].texture.height,
             .width = (float)cardsOfPlayer[i].texture.width,
@@ -53,9 +53,9 @@ int main(void)
             .y = 0.0f
         };
 
-        // This makes the cards to be drawned out with overlap
+        // Ezzel a változóval határozzuk meg, hogy mennyire legyenek közel egymáshoz a kártyák
         float shiftOfCardsInDeck = 0.8f;
-        // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
+        // Meghatározzuk a kirajzolandó kártya méretét és pozícióját (ebbe a négyszögbe lesz beleigazítva az előzőleg meghatározott textúra)
         cardsOfPlayer[i].outline = (Rectangle){
             .height = heightOfCards,
             .width = widthOfCards,
@@ -63,22 +63,22 @@ int main(void)
             .y = (float)(screenHeight - heightOfCards)
         };
 
-        // TODO: Found out what is this for
+        // Nem tudjuk ez mire van
         cardsOfPlayer[i].origin = (Vector2){
             .x = 0.0f,
             .y = 0.0f
         };
     }
 
-    // Shift the height of cards to match the pattern of holding cards in hand
+    // Ezzel a változóval csúsztassuk magasabbra/alacsonyabbra a kártyákat, mintha a játékos a kezeiben tartaná
     int shiftUp = 20.0f;
     int counter = 0;
     for (int i = 0; i < numberOfCards; i++) {
         if (i < numberOfCards / 2) {
-            // Increase counter before the half-way point
+            // A kártyák feléig felfelé csúsztassuk a kártyák pozícióját
             counter++;
         } else if(i > numberOfCards / 2){
-            // Decrease counter after the half-way point
+            // A kártyák felétől lefelé csúsztassuk a kártyák pozícióját
             counter--;
         }
         cardsOfPlayer[i].outline.y -= counter * shiftUp;
@@ -165,7 +165,6 @@ int main(void)
                 } break;
                 case GAMEPLAY:
                 {
-                    // TODO: Draw the hand of the player with this function
                     drawPlayerHand(cardsOfPlayer, numberOfCards);
                 } break;
                 case ENDING:
@@ -200,10 +199,10 @@ int main(void)
     return 0;
 }
 
+// A kártyákat úgy rajzolja ki, mintha a játékos a kezeiben tartaná
 void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
     float rotation = 0.0f;
     for(int i = 0; i < numberOfCards; i++){
-        //cardsOfPlayer[i].outline.
         DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, rotation, WHITE);
     }
 }
