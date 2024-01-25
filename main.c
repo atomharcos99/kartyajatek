@@ -22,7 +22,7 @@ const float widthOfCards = 131.0f;
 
 void resertCardPositionAndSize(Card *, int);
 void drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
-void drawHoverOverCards(Card *, int);
+void drawHoverOverCards(Card , int, int);
 
 int main(void)
 {
@@ -30,7 +30,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-    // ToggleFullscreen();
+    ToggleFullscreen();
 
     GameScreen currentScreen = LOGO;
 
@@ -153,7 +153,7 @@ int main(void)
                 {
                     // TODO: Draw the hand of the player with this function
                     drawPlayerHand(cardsOfPlayer, numberOfCards);
-                    drawHoverOverCards(cardsOfPlayer, numberOfCards);
+                    
                 } break;
                 case ENDING:
                 {
@@ -203,7 +203,8 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
     int counter = 0;
 
     resertCardPositionAndSize(cardsOfPlayer, numberOfCards);
-
+    int marked= -1;
+    int current_card_rotation;
     for(int i = 0; i < numberOfCards; i++){
         // Check if the mouse is hovered over the cards
         if(!CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
@@ -211,7 +212,7 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
             cardsOfPlayer[i].outline.x = (float)((screenWidth - numberOfCards * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck))/2 + i * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck));
             // This reset is need for the cards in the middle
             rotation = 0.0f;
-            shiftToCorrect = 40.0f;
+            shiftToCorrect = 0.0f;
 
             // Shift the height of cards to match the pattern of holding cards in hand
             if (i < numberOfCards / 2) {
@@ -221,30 +222,45 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
                 counter++;
             } else if(i > numberOfCards / 2){
                 rotation = 30.0f - counter * 5.0f;
-                shiftToCorrect = 0.0f;
+                //shiftToCorrect = 0.0f;
                 // Start decreasing counter after the half-way point
                 counter--;
             } else {
-                shiftToCorrect = 15.0f;
+            
+                //shiftToCorrect = 15.0f;
             }
 
             // (screenHeight - cardsOfPlayer[i].outline.height) = place the card on the bottom of the screen - (the shift of the card in the column)
             cardsOfPlayer[i].outline.y = (float)(screenHeight - cardsOfPlayer[i].outline.height) - counter * shiftUp + shiftToCorrect;
             
             DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, rotation, WHITE);
+            
+
         }
+      
+        if(CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
+                marked=i;
+                current_card_rotation=rotation;
+                
+        }
+
     }
+    if (marked>-1){
+        drawHoverOverCards(cardsOfPlayer[marked], numberOfCards, current_card_rotation);
+        marked=-1;
+    }
+    
 
 }
 
-void drawHoverOverCards(Card *cardsOfPlayer, int numberOfCards){
-    for(int i = 0; i < numberOfCards; i++){
-        if(CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
-            cardsOfPlayer[i].outline.x = (float) ((screenWidth / 2) - (cardsOfPlayer[i].outline.width / 2));
-            cardsOfPlayer[i].outline.y = (float) ((screenHeight / 2) - (cardsOfPlayer[i].outline.height / 2));
-            cardsOfPlayer[i].outline.width = 2.0f * widthOfCards;
-            cardsOfPlayer[i].outline.height = 2.0f * heightOfCards;
-            DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, 0.0f, WHITE);
-        }
+void drawHoverOverCards(Card cardsOfPlayer, int numberOfCards, int rotation){
+    if(CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer.outline)){
+        cardsOfPlayer.outline.x -= 15.0f;
+        cardsOfPlayer.outline.y -= 30.0f;
+        cardsOfPlayer.outline.width = 1.4f * widthOfCards;
+        cardsOfPlayer.outline.height = 1.4f * heightOfCards;
+        DrawTexturePro(cardsOfPlayer.texture, cardsOfPlayer.source, cardsOfPlayer.outline, cardsOfPlayer.origin, rotation, WHITE);
+        
     }
+    
 }
