@@ -11,22 +11,26 @@ typedef struct Card {
     Rectangle outline;
     Vector2 origin;
 } Card;
-
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 
-void drawPlayerHand(Card *, int);
+const int screenWidth = 1920;
+const int screenHeight = 1080;
+const float heightOfCards = 214.0f;
+const float widthOfCards = 131.0f;
+
+void resertCardPositionAndSize(Card *, int);
+void drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
+void drawHoverOverCards(Card *, int);
 
 int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-    ToggleFullscreen();
+    // ToggleFullscreen();
 
     GameScreen currentScreen = LOGO;
 
@@ -35,17 +39,15 @@ int main(void)
     int framesCounter = 0;          // Useful to count frames
 
     int numberOfCards = 8;
-    float heightOfCards = 214.0f;
-    float widthOfCards = 131.0f;
 
     Card cardsOfPlayer[numberOfCards];
 
-    // Létrehozzuk a játékos kezeiben lévő kártyákat
+    // Initializing the cards
     for(int i = 0; i < numberOfCards; i++){
-        // Betöltsük a kártyák textúráit
+        // Loading the textures of the cards
         cardsOfPlayer[i].texture = LoadTexture(TextFormat("images/image_card%d.png", i));
 
-        // Meghatározzuk a textúrán belüli kirajzolandó terület pozícióját és méretét
+        // The size and position of the texture in the file
         cardsOfPlayer[i].source = (Rectangle){
             .height = (float)cardsOfPlayer[i].texture.height,
             .width = (float)cardsOfPlayer[i].texture.width,
@@ -53,35 +55,19 @@ int main(void)
             .y = 0.0f
         };
 
-        // Ezzel a változóval határozzuk meg, hogy mennyire legyenek közel egymáshoz a kártyák
-        float shiftOfCardsInDeck = 0.8f;
-        // Meghatározzuk a kirajzolandó kártya méretét és pozícióját (ebbe a négyszögbe lesz beleigazítva az előzőleg meghatározott textúra)
+        // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
         cardsOfPlayer[i].outline = (Rectangle){
             .height = heightOfCards,
             .width = widthOfCards,
-            .x = (float) ((screenWidth - numberOfCards * (widthOfCards * shiftOfCardsInDeck))/2 + i * (widthOfCards * shiftOfCardsInDeck)),
+            .x = 0.0f,
             .y = (float)(screenHeight - heightOfCards)
         };
 
-        // Nem tudjuk ez mire van
+        // TODO: Found out what is this for
         cardsOfPlayer[i].origin = (Vector2){
             .x = 0.0f,
             .y = 0.0f
         };
-    }
-
-    // Ezzel a változóval csúsztassuk magasabbra/alacsonyabbra a kártyákat, mintha a játékos a kezeiben tartaná
-    int shiftUp = 20.0f;
-    int counter = 0;
-    for (int i = 0; i < numberOfCards; i++) {
-        if (i < numberOfCards / 2) {
-            // A kártyák feléig felfelé csúsztassuk a kártyák pozícióját
-            counter++;
-        } else if(i > numberOfCards / 2){
-            // A kártyák felétől lefelé csúsztassuk a kártyák pozícióját
-            counter--;
-        }
-        cardsOfPlayer[i].outline.y -= counter * shiftUp;
     }
 
     SetTargetFPS(60);               // Set desired framerate (frames-per-second)
@@ -165,7 +151,9 @@ int main(void)
                 } break;
                 case GAMEPLAY:
                 {
+                    // TODO: Draw the hand of the player with this function
                     drawPlayerHand(cardsOfPlayer, numberOfCards);
+                    drawHoverOverCards(cardsOfPlayer, numberOfCards);
                 } break;
                 case ENDING:
                 {
@@ -199,10 +187,64 @@ int main(void)
     return 0;
 }
 
-// A kártyákat úgy rajzolja ki, mintha a játékos a kezeiben tartaná
-void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
-    float rotation = 0.0f;
+void resertCardPositionAndSize(Card *cardsOfPlayer, int numberOfCards){
     for(int i = 0; i < numberOfCards; i++){
-        DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, rotation, WHITE);
+        cardsOfPlayer[i].outline.x = 0.0f;
+        cardsOfPlayer[i].outline.y = (float)(screenHeight - heightOfCards);
+        cardsOfPlayer[i].outline.width = widthOfCards;
+        cardsOfPlayer[i].outline.height = heightOfCards;
+    }
+}
+
+void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
+    float shiftOfCardsInDeck = 0.7f; // percentage
+    float rotation = 0.0f, shiftToCorrect = 0.0f; // this variable needed to correctly arrange the right-top corner of the cards on the right side
+    int shiftUp = 20.0f;
+    int counter = 0;
+
+    resertCardPositionAndSize(cardsOfPlayer, numberOfCards);
+
+    for(int i = 0; i < numberOfCards; i++){
+        // Check if the mouse is hovered over the cards
+        if(!CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
+            // This makes the cards to be drawned out with overlap
+            cardsOfPlayer[i].outline.x = (float)((screenWidth - numberOfCards * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck))/2 + i * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck));
+            // This reset is need for the cards in the middle
+            rotation = 0.0f;
+            shiftToCorrect = 40.0f;
+
+            // Shift the height of cards to match the pattern of holding cards in hand
+            if (i < numberOfCards / 2) {
+                rotation = (30.0f - counter * 5.0f) * -1; // -1 need for the cards to lean counter-clockwise
+                //shiftToCorrect = 100.0f - counter * 10.0f;
+                // Increase counter before the half-way point
+                counter++;
+            } else if(i > numberOfCards / 2){
+                rotation = 30.0f - counter * 5.0f;
+                shiftToCorrect = 0.0f;
+                // Start decreasing counter after the half-way point
+                counter--;
+            } else {
+                shiftToCorrect = 15.0f;
+            }
+
+            // (screenHeight - cardsOfPlayer[i].outline.height) = place the card on the bottom of the screen - (the shift of the card in the column)
+            cardsOfPlayer[i].outline.y = (float)(screenHeight - cardsOfPlayer[i].outline.height) - counter * shiftUp + shiftToCorrect;
+            
+            DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, rotation, WHITE);
+        }
+    }
+
+}
+
+void drawHoverOverCards(Card *cardsOfPlayer, int numberOfCards){
+    for(int i = 0; i < numberOfCards; i++){
+        if(CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
+            cardsOfPlayer[i].outline.x = (float) ((screenWidth / 2) - (cardsOfPlayer[i].outline.width / 2));
+            cardsOfPlayer[i].outline.y = (float) ((screenHeight / 2) - (cardsOfPlayer[i].outline.height / 2));
+            cardsOfPlayer[i].outline.width = 2.0f * widthOfCards;
+            cardsOfPlayer[i].outline.height = 2.0f * heightOfCards;
+            DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, 0.0f, WHITE);
+        }
     }
 }
