@@ -26,7 +26,7 @@ int main(void)
     const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-    // ToggleFullscreen();
+    ToggleFullscreen();
 
     GameScreen currentScreen = LOGO;
 
