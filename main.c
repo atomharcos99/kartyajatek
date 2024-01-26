@@ -138,7 +138,7 @@ int main(void)
             case GAMEPLAY:
             {
                 // TODO: Update GAMEPLAY screen variables here!
-                // PlayMusicStream(music);
+                PlayMusicStream(music);
                 // Press enter to change to ENDING screen
                 // if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
                 // {
