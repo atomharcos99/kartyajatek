@@ -10,6 +10,7 @@ typedef struct Card {
     Rectangle source;
     Rectangle outline;
     Vector2 origin;
+    bool played;
 } Card;
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -21,16 +22,18 @@ const float heightOfCards = 214.0f;
 const float widthOfCards = 131.0f;
 
 void resetCardPositionAndSize(Card *, int);
-void drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
-void drawHoverOverCards(Card, float);
+int drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
+bool drawHoverOverCards(Card, float);
+void reorganizeCardsInHand(Card *, int);
+void drawPlayedCards(Card *, int);
 
 int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-    // ToggleFullscreen();
+    ToggleFullscreen();
+    InitAudioDevice();
 
     GameScreen currentScreen = LOGO;
 
@@ -38,9 +41,34 @@ int main(void)
 
     int framesCounter = 0;          // Useful to count frames
 
-    int numberOfCards = 8;
+    const int numberOfCards = 8;
+    int numberOfCardsInPlayerHand = 8;
+    
+    // Setting up variables for the background
+    Texture2D backgroundTexture = LoadTexture("images/background.png");
+    Rectangle backgroundSrcRec = (Rectangle){
+        .height = backgroundTexture.height,
+        .width = backgroundTexture.width,
+        .x = 0,
+        .y = 0
+    };
+    Rectangle backgroundDestRec = (Rectangle){
+        .height = 1080.0f,
+        .width = 1920.0f,
+        .x = 0.0f,
+        .y = 0.0f
+    };
+    Vector2 backgroundOrigin = (Vector2){
+        .x = 0.0f,
+        .y = 0.0f
+    };
+
+    // Setting up background music
+    Music music = LoadMusicStream("audio/background_music.wav");
 
     Card cardsOfPlayer[numberOfCards];
+    Card playedCardsOfPlayer[numberOfCards];
+    int numberOfPlayedCards = -1;
 
     // Initializing the cards
     for(int i = 0; i < numberOfCards; i++){
@@ -68,6 +96,10 @@ int main(void)
             .x = 0.0f,
             .y = 0.0f
         };
+
+        // Initializing every card as unplayed
+        cardsOfPlayer[i].played = false;
+        playedCardsOfPlayer[i].played = false;
     }
 
     SetTargetFPS(60);               // Set desired framerate (frames-per-second)
@@ -76,6 +108,7 @@ int main(void)
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+        UpdateMusicStream(music);   // Update music buffer with new stream data. WITHOUT THIS THE MUSIC WON'T START!
         // Update
         //----------------------------------------------------------------------------------
         switch(currentScreen)
@@ -105,7 +138,7 @@ int main(void)
             case GAMEPLAY:
             {
                 // TODO: Update GAMEPLAY screen variables here!
-
+                // PlayMusicStream(music);
                 // Press enter to change to ENDING screen
                 // if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
                 // {
@@ -152,7 +185,18 @@ int main(void)
                 case GAMEPLAY:
                 {
                     // TODO: Draw the hand of the player with this function
-                    drawPlayerHand(cardsOfPlayer, numberOfCards);
+                    DrawTexturePro(backgroundTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
+                    int selected_card = drawPlayerHand(cardsOfPlayer, numberOfCardsInPlayerHand);
+                    if(selected_card > -1){
+                        // If the selected cards was clicked, decrease the value of the number of cards in the player's hand
+                        numberOfCardsInPlayerHand--;
+                        // Move the played card to the played card array
+                        numberOfPlayedCards++;
+                        playedCardsOfPlayer[numberOfPlayedCards] = cardsOfPlayer[selected_card];
+                        // Reorganize cards in player's hand
+                        reorganizeCardsInHand(cardsOfPlayer, numberOfCards);
+                    }
+                    drawPlayedCards(playedCardsOfPlayer, numberOfPlayedCards);
                 } break;
                 case ENDING:
                 {
@@ -179,7 +223,8 @@ int main(void)
         UnloadTexture(cardsOfPlayer[i].texture);
     }
     
-
+    UnloadMusicStream(music);          // Unload music stream buffers from RAM
+    CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -195,7 +240,7 @@ void resetCardPositionAndSize(Card *cardsOfPlayer, int numberOfCards){
     }
 }
 
-void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
+int drawPlayerHand(Card *cardsOfPlayer, int numberOfCardsInPlayerHand){
     float shiftOfCardsInDeck = 0.7f; // percentage
     float rotation = 0.0f, shiftToCorrect = 0.0f; // this variable needed to correctly arrange the right-top corner of the cards on the right side
     int shiftUp = 20.0f;
@@ -203,11 +248,14 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
     int markedCardIndex = -1;
     float markedCardRotation;
 
-    resetCardPositionAndSize(cardsOfPlayer, numberOfCards);
+    resetCardPositionAndSize(cardsOfPlayer, numberOfCardsInPlayerHand);
     
-    for(int i = 0; i < numberOfCards; i++){
+    for(int i = 0; i < numberOfCardsInPlayerHand; i++){
+        // If the card was played, do not change the properties of the card, skip it
+        if(cardsOfPlayer[i].played) continue;
+
         // This makes the cards to be drawned out with overlap
-        cardsOfPlayer[i].outline.x = (float)((screenWidth - numberOfCards * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck))/2 + i * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck));
+        cardsOfPlayer[i].outline.x = (float)((screenWidth - numberOfCardsInPlayerHand * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck))/2 + i * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck));
         // This reset is need for the cards in the middle
         rotation = 0.0f;
 
@@ -215,12 +263,12 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
         shiftToCorrect = 40.0f;
 
         // Shift the height of cards to match the pattern of holding cards in hand
-        if (i < numberOfCards / 2) {
+        if (i < numberOfCardsInPlayerHand / 2) {
             rotation = (30.0f - counter * 5.0f) * -1; // -1 need for the cards to lean counter-clockwise
             //shiftToCorrect = 100.0f - counter * 10.0f;
             // Increase counter before the half-way point
             counter++;
-        } else if(i > numberOfCards / 2){
+        } else if(i > numberOfCardsInPlayerHand / 2){
             rotation = 30.0f - counter * 5.0f;
             shiftToCorrect = 0.0f;
             // Start decreasing counter after the half-way point
@@ -243,16 +291,51 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
     }
     // Drawing the selected (hovered) card
     if(markedCardIndex > -1) {
-        drawHoverOverCards(cardsOfPlayer[markedCardIndex], markedCardRotation);
-        // Resetting flags
-        markedCardIndex = -1;
+        if(drawHoverOverCards(cardsOfPlayer[markedCardIndex], markedCardRotation)){
+            // Saving the index to return later (since the markedCardIndex variable will be reseted before returning a value)
+            int indexToReturn = markedCardIndex;
+            // If the selected card was clicked on, set the flag 
+            cardsOfPlayer[markedCardIndex].played = true;
+            // Resetting flags
+            markedCardIndex = -1;
+            return indexToReturn;
+        }
     }
+    return -1;
 }
 
-void drawHoverOverCards(Card cardToDraw, float rotation){
+bool drawHoverOverCards(Card cardToDraw, float rotation){
     cardToDraw.outline.x -= 15.0f;
-    cardToDraw.outline.y -= 30.0f;
+    cardToDraw.outline.y -= 100.0f;
     cardToDraw.outline.width = 1.4f * widthOfCards;
     cardToDraw.outline.height = 1.4f * heightOfCards;
     DrawTexturePro(cardToDraw.texture, cardToDraw.source, cardToDraw.outline, cardToDraw.origin, rotation, WHITE);
+    // If the player presses the left mouse button while the card is selected, the card is played
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        return true;
+    }
+    return false;
+}
+
+void reorganizeCardsInHand(Card *cardsOfPlayer, int numberOfCards){
+    // Start searching for a played card
+    for(int i = 0; i < numberOfCards-1; i++){
+        if(cardsOfPlayer[i].played){
+            // If found a played card, push each card from the index of the played card to one index to the left (so decrease their index by one)
+            for(int j = i; j < numberOfCards-1; j++){
+                cardsOfPlayer[j] = cardsOfPlayer[j+1];
+            }
+        }
+    }
+}
+
+void drawPlayedCards(Card *playedCardsOfPlayer, int numberOfPlayedCards){
+    // Check if the player has played any card
+    if(numberOfPlayedCards > -1){
+        for(int i = 0; i <= numberOfPlayedCards; i++){
+            playedCardsOfPlayer[i].outline.x = i * playedCardsOfPlayer[i].outline.width;
+            playedCardsOfPlayer[i].outline.y = (screenHeight / 2) - (heightOfCards / 2);
+            DrawTexturePro(playedCardsOfPlayer[i].texture, playedCardsOfPlayer[i].source, playedCardsOfPlayer[i].outline, playedCardsOfPlayer[i]. origin, 0.0f, WHITE);
+        }
+    }
 }
