@@ -20,9 +20,9 @@ const int screenHeight = 1080;
 const float heightOfCards = 214.0f;
 const float widthOfCards = 131.0f;
 
-void resertCardPositionAndSize(Card *, int);
+void resetCardPositionAndSize(Card *, int);
 void drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
-void drawHoverOverCards(Card *, int);
+void drawHoverOverCards(Card, float);
 
 int main(void)
 {
@@ -153,7 +153,6 @@ int main(void)
                 {
                     // TODO: Draw the hand of the player with this function
                     drawPlayerHand(cardsOfPlayer, numberOfCards);
-                    drawHoverOverCards(cardsOfPlayer, numberOfCards);
                 } break;
                 case ENDING:
                 {
@@ -187,7 +186,7 @@ int main(void)
     return 0;
 }
 
-void resertCardPositionAndSize(Card *cardsOfPlayer, int numberOfCards){
+void resetCardPositionAndSize(Card *cardsOfPlayer, int numberOfCards){
     for(int i = 0; i < numberOfCards; i++){
         cardsOfPlayer[i].outline.x = 0.0f;
         cardsOfPlayer[i].outline.y = (float)(screenHeight - heightOfCards);
@@ -201,50 +200,59 @@ void drawPlayerHand(Card *cardsOfPlayer, int numberOfCards){
     float rotation = 0.0f, shiftToCorrect = 0.0f; // this variable needed to correctly arrange the right-top corner of the cards on the right side
     int shiftUp = 20.0f;
     int counter = 0;
+    int markedCardIndex = -1;
+    float markedCardRotation;
 
-    resertCardPositionAndSize(cardsOfPlayer, numberOfCards);
-
+    resetCardPositionAndSize(cardsOfPlayer, numberOfCards);
+    
     for(int i = 0; i < numberOfCards; i++){
-        // Check if the mouse is hovered over the cards
+        // This makes the cards to be drawned out with overlap
+        cardsOfPlayer[i].outline.x = (float)((screenWidth - numberOfCards * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck))/2 + i * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck));
+        // This reset is need for the cards in the middle
+        rotation = 0.0f;
+
+        // We try to align the edges of the cards from the left of the center card with this variable
+        shiftToCorrect = 40.0f;
+
+        // Shift the height of cards to match the pattern of holding cards in hand
+        if (i < numberOfCards / 2) {
+            rotation = (30.0f - counter * 5.0f) * -1; // -1 need for the cards to lean counter-clockwise
+            //shiftToCorrect = 100.0f - counter * 10.0f;
+            // Increase counter before the half-way point
+            counter++;
+        } else if(i > numberOfCards / 2){
+            rotation = 30.0f - counter * 5.0f;
+            shiftToCorrect = 0.0f;
+            // Start decreasing counter after the half-way point
+            counter--;
+        } else {
+            shiftToCorrect = 15.0f;
+        }
+
+        // (screenHeight - cardsOfPlayer[i].outline.height) = place the card on the bottom of the screen - (the shift of the card in the column)
+        cardsOfPlayer[i].outline.y = (float)(screenHeight - cardsOfPlayer[i].outline.height) - counter * shiftUp + shiftToCorrect;
+
         if(!CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
-            // This makes the cards to be drawned out with overlap
-            cardsOfPlayer[i].outline.x = (float)((screenWidth - numberOfCards * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck))/2 + i * (cardsOfPlayer[i].outline.width * shiftOfCardsInDeck));
-            // This reset is need for the cards in the middle
-            rotation = 0.0f;
-            shiftToCorrect = 40.0f;
-
-            // Shift the height of cards to match the pattern of holding cards in hand
-            if (i < numberOfCards / 2) {
-                rotation = (30.0f - counter * 5.0f) * -1; // -1 need for the cards to lean counter-clockwise
-                //shiftToCorrect = 100.0f - counter * 10.0f;
-                // Increase counter before the half-way point
-                counter++;
-            } else if(i > numberOfCards / 2){
-                rotation = 30.0f - counter * 5.0f;
-                shiftToCorrect = 0.0f;
-                // Start decreasing counter after the half-way point
-                counter--;
-            } else {
-                shiftToCorrect = 15.0f;
-            }
-
-            // (screenHeight - cardsOfPlayer[i].outline.height) = place the card on the bottom of the screen - (the shift of the card in the column)
-            cardsOfPlayer[i].outline.y = (float)(screenHeight - cardsOfPlayer[i].outline.height) - counter * shiftUp + shiftToCorrect;
-            
+            // Simply draw the card if it is not selected
             DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, rotation, WHITE);
+        } else {
+            // Save the info of the card the cursor is on to draw the selected card AFTER the for loop, so the selected card will be on top
+            markedCardIndex = i;
+            markedCardRotation = rotation;
         }
     }
-
+    // Drawing the selected (hovered) card
+    if(markedCardIndex > -1) {
+        drawHoverOverCards(cardsOfPlayer[markedCardIndex], markedCardRotation);
+        // Resetting flags
+        markedCardIndex = -1;
+    }
 }
 
-void drawHoverOverCards(Card *cardsOfPlayer, int numberOfCards){
-    for(int i = 0; i < numberOfCards; i++){
-        if(CheckCollisionPointRec(GetMousePosition(), cardsOfPlayer[i].outline)){
-            cardsOfPlayer[i].outline.x = (float) ((screenWidth / 2) - (cardsOfPlayer[i].outline.width / 2));
-            cardsOfPlayer[i].outline.y = (float) ((screenHeight / 2) - (cardsOfPlayer[i].outline.height / 2));
-            cardsOfPlayer[i].outline.width = 2.0f * widthOfCards;
-            cardsOfPlayer[i].outline.height = 2.0f * heightOfCards;
-            DrawTexturePro(cardsOfPlayer[i].texture, cardsOfPlayer[i].source, cardsOfPlayer[i].outline, cardsOfPlayer[i].origin, 0.0f, WHITE);
-        }
-    }
+void drawHoverOverCards(Card cardToDraw, float rotation){
+    cardToDraw.outline.x -= 15.0f;
+    cardToDraw.outline.y -= 30.0f;
+    cardToDraw.outline.width = 1.4f * widthOfCards;
+    cardToDraw.outline.height = 1.4f * heightOfCards;
+    DrawTexturePro(cardToDraw.texture, cardToDraw.source, cardToDraw.outline, cardToDraw.origin, rotation, WHITE);
 }
