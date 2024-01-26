@@ -330,10 +330,23 @@ void reorganizeCardsInHand(Card *cardsOfPlayer, int numberOfCards){
 }
 
 void drawPlayedCards(Card *playedCardsOfPlayer, int numberOfPlayedCards){
+    int shift = 0;
     // Check if the player has played any card
     if(numberOfPlayedCards > -1){
-        for(int i = 0; i <= numberOfPlayedCards; i++){
-            playedCardsOfPlayer[i].outline.x = i * playedCardsOfPlayer[i].outline.width;
+        // Draw the first card
+        playedCardsOfPlayer[0].outline.x = (0 * playedCardsOfPlayer[0].outline.width);
+        playedCardsOfPlayer[0].outline.y = (screenHeight / 2) - (heightOfCards / 2);
+        DrawTexturePro(playedCardsOfPlayer[0].texture, playedCardsOfPlayer[0].source, playedCardsOfPlayer[0].outline, playedCardsOfPlayer[0]. origin, 0.0f, WHITE);
+        
+        for(int i = 1; i < numberOfPlayedCards - 3; i++){
+            // Draw the cards up until the third card from the last position with a little overlap
+            playedCardsOfPlayer[i].outline.x = (i * playedCardsOfPlayer[i].outline.width) - i * 50.0f;
+            playedCardsOfPlayer[i].outline.y = (screenHeight / 2) - (heightOfCards / 2);
+            DrawTexturePro(playedCardsOfPlayer[i].texture, playedCardsOfPlayer[i].source, playedCardsOfPlayer[i].outline, playedCardsOfPlayer[i]. origin, 0.0f, WHITE);
+        }
+        for(int i = numberOfPlayedCards - 3; i <= numberOfPlayedCards; i++){
+            // Draw the cards from the second index from the back to the last next to each other without overlap
+            playedCardsOfPlayer[i].outline.x = i * playedCardsOfPlayer[i].outline.width - (numberOfPlayedCards - 3)*50.0f;
             playedCardsOfPlayer[i].outline.y = (screenHeight / 2) - (heightOfCards / 2);
             DrawTexturePro(playedCardsOfPlayer[i].texture, playedCardsOfPlayer[i].source, playedCardsOfPlayer[i].outline, playedCardsOfPlayer[i]. origin, 0.0f, WHITE);
         }
