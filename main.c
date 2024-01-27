@@ -1,9 +1,25 @@
 #include "raylib.h"
+#include <time.h>
+#include <stdlib.h>
+
+#define RARITY_GRAY 1
+#define RARITY_GREEN 2
+#define RARITY_BLUE 3
+#define RARITY_PURPLE 4
+#define RARITY_GOLD 5
+#define RARITY_HERO 6
+
+#define CAST_GHOST 1
+#define CAST_KNIGHT 2
+#define CAST_ORK 3
+#define CAST_WIZARD 4
+#define CAST_HERO 5
 
 //------------------------------------------------------------------------------------------
 // Types and Structures Definition
 //------------------------------------------------------------------------------------------
 typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY, ENDING } GameScreen;
+typedef enum Map {CASTLE, CAVE, HELL, SWAMP} Map;
 
 typedef struct Card {
     Texture texture;
@@ -11,7 +27,10 @@ typedef struct Card {
     Rectangle outline;
     Vector2 origin;
     bool played;
+    int rarity;
+    int cast;
 } Card;
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -20,7 +39,10 @@ const int screenWidth = 1920;
 const int screenHeight = 1080;
 const float heightOfCards = 214.0f;
 const float widthOfCards = 131.0f;
+Card cardCollection[21]; // This variable contains all cards
 
+void initializeCards(Card *, int, Card *);
+void randomSelectDeckCards(Card *, int);
 void resetCardPositionAndSize(Card *, int);
 int drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
 bool drawHoverOverCards(Card, float);
@@ -35,7 +57,40 @@ int main(void)
     ToggleFullscreen();
     InitAudioDevice();
 
+    // Initializing the rand function
+    srand(time(NULL));
+
     GameScreen currentScreen = LOGO;
+    Map map;
+    // Generate a random number for the map selection 
+    int randomNumber = rand() % 4 + 1;
+    Texture2D mapTexture;
+    // Select the map according to the random number generated
+    switch (randomNumber)
+    {
+    case 1:
+        map = CASTLE;
+        mapTexture = LoadTexture("images/background_map/desk_castle.png");
+        break;
+
+    case 2:
+        map = CAVE;
+        mapTexture = LoadTexture("images/background_map/desk_cave.png");
+        break;
+
+    case 3:
+        map = HELL;
+        mapTexture = LoadTexture("images/background_map/desk_hell.png");
+        break;
+
+    case 4:
+        map = SWAMP;
+        mapTexture = LoadTexture("images/background_map/desk_swamp.png");
+        break;
+    
+    default:
+        break;
+    }
 
     // TODO: Initialize all required variables and load all required data here!
 
@@ -44,8 +99,10 @@ int main(void)
     const int numberOfCards = 8;
     int numberOfCardsInPlayerHand = 8;
     
+    // Rarity 1: gray, 2: green, 3: blue, 4: purple, 5: gold, 6: hero
+    // Casts: 1: ghost, 2: knight, 3: ork, 4: wizard, 5: hero
     // Setting up variables for the background
-    Texture2D backgroundTexture = LoadTexture("images/background.png");
+    Texture2D backgroundTexture = LoadTexture("images/background_map/background.png");
     Rectangle backgroundSrcRec = (Rectangle){
         .height = backgroundTexture.height,
         .width = backgroundTexture.width,
@@ -64,43 +121,14 @@ int main(void)
     };
 
     // Setting up background music
-    Music music = LoadMusicStream("audio/background_music.wav");
+    Music music = LoadMusicStream("audio/background_music.mp3");
 
     Card cardsOfPlayer[numberOfCards];
     Card playedCardsOfPlayer[numberOfCards];
     int numberOfPlayedCards = -1;
 
-    // Initializing the cards
-    for(int i = 0; i < numberOfCards; i++){
-        // Loading the textures of the cards
-        cardsOfPlayer[i].texture = LoadTexture(TextFormat("images/image_card%d.png", i));
-
-        // The size and position of the texture in the file
-        cardsOfPlayer[i].source = (Rectangle){
-            .height = (float)cardsOfPlayer[i].texture.height,
-            .width = (float)cardsOfPlayer[i].texture.width,
-            .x = 0.0f,
-            .y = 0.0f
-        };
-
-        // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
-        cardsOfPlayer[i].outline = (Rectangle){
-            .height = heightOfCards,
-            .width = widthOfCards,
-            .x = 0.0f,
-            .y = (float)(screenHeight - heightOfCards)
-        };
-
-        // TODO: Found out what is this for
-        cardsOfPlayer[i].origin = (Vector2){
-            .x = 0.0f,
-            .y = 0.0f
-        };
-
-        // Initializing every card as unplayed
-        cardsOfPlayer[i].played = false;
-        playedCardsOfPlayer[i].played = false;
-    }
+    initializeCards(cardsOfPlayer, numberOfCards, playedCardsOfPlayer);
+    randomSelectDeckCards(cardsOfPlayer, numberOfCards);
 
     SetTargetFPS(60);               // Set desired framerate (frames-per-second)
     //--------------------------------------------------------------------------------------
@@ -138,7 +166,7 @@ int main(void)
             case GAMEPLAY:
             {
                 // TODO: Update GAMEPLAY screen variables here!
-                // PlayMusicStream(music);
+                PlayMusicStream(music);
                 // Press enter to change to ENDING screen
                 // if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
                 // {
@@ -186,6 +214,7 @@ int main(void)
                 {
                     // TODO: Draw the hand of the player with this function
                     DrawTexturePro(backgroundTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
+                    DrawTexturePro(mapTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
                     int selected_card = drawPlayerHand(cardsOfPlayer, numberOfCardsInPlayerHand);
                     if(selected_card > -1){
                         // If the selected cards was clicked, decrease the value of the number of cards in the player's hand
@@ -229,6 +258,66 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     return 0;
+}
+
+void initializeCards(Card *cardsOfPlayer, int numberOfCards, Card *playedCardsOfPlayer){
+    int index = 0;
+    // Loading the textures of the cards
+    for(int rarity = 1; rarity <= 5; rarity++){
+        for(int cast = 1; cast <= 4; cast++){
+            cardCollection[index].texture = LoadTexture(TextFormat("images/cards/card_%d_%d.png", rarity, cast));
+            //cardCollection[index].texture = LoadTexture("images/cards/image_card0.png");
+            index++;
+        }
+    }
+    
+    // The index at this point should be 20. This is a safety check
+    if(index != 20) exit(1);
+
+    // Loading the texture of the hero card
+    cardCollection[index].texture = LoadTexture("images/cards/card_6_5.png");
+
+    for(int i = 0; i < 21; i++){
+        // The size and position of the texture in the file
+        cardCollection[i].source = (Rectangle){
+            .height = (float)cardCollection[i].texture.height,
+            .width = (float)cardCollection[i].texture.width,
+            .x = 0.0f,
+            .y = 0.0f
+        };
+
+        // The outlines of the size and position of the cards (the texture will be scaled according of this rectangle's size)
+        cardCollection[i].outline = (Rectangle){
+            .height = heightOfCards,
+            .width = widthOfCards,
+            .x = 0.0f,
+            .y = (float)(screenHeight - heightOfCards)
+        };
+
+        // TODO: Found out what is this for
+        cardCollection[i].origin = (Vector2){
+            .x = 0.0f,
+            .y = 0.0f
+        };
+
+        cardCollection[i].played = false;
+
+    }
+    // Initializing cards in hand and on the board
+    for (int i = 0; i < numberOfCards; i++)
+    {
+        // Initializing every card as unplayed (just in case)
+        cardsOfPlayer[i].played = false;
+        playedCardsOfPlayer[i].played = false;
+    }
+    
+}
+
+void randomSelectDeckCards(Card *cardsOfPlayer, int numberOfCards){
+    for(int i = 0; i < numberOfCards; i++){
+        int randomIndex = rand() % 16;
+        cardsOfPlayer[i] = cardCollection[randomIndex];
+    }
 }
 
 void resetCardPositionAndSize(Card *cardsOfPlayer, int numberOfCards){
