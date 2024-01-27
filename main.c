@@ -337,16 +337,22 @@ void drawPlayedCards(Card *playedCardsOfPlayer, int numberOfPlayedCards){
         playedCardsOfPlayer[0].outline.x = (0 * playedCardsOfPlayer[0].outline.width);
         playedCardsOfPlayer[0].outline.y = (screenHeight / 2) - (heightOfCards / 2);
         DrawTexturePro(playedCardsOfPlayer[0].texture, playedCardsOfPlayer[0].source, playedCardsOfPlayer[0].outline, playedCardsOfPlayer[0]. origin, 0.0f, WHITE);
-        
-        for(int i = 1; i < numberOfPlayedCards - 3; i++){
-            // Draw the cards up until the third card from the last position with a little overlap
-            playedCardsOfPlayer[i].outline.x = (i * playedCardsOfPlayer[i].outline.width) - i * 50.0f;
+
+        // If the number is not greater than 0 -> return (so the index won't be -1 below)
+        if(numberOfPlayedCards == 0) return;
+
+        // Draw the cards up until the third card from the last position with a little overlap
+        for(int i = 1; i <= numberOfPlayedCards - 2; i++){
+            playedCardsOfPlayer[i].outline.x = playedCardsOfPlayer[i-1].outline.x + 50.0f;
             playedCardsOfPlayer[i].outline.y = (screenHeight / 2) - (heightOfCards / 2);
             DrawTexturePro(playedCardsOfPlayer[i].texture, playedCardsOfPlayer[i].source, playedCardsOfPlayer[i].outline, playedCardsOfPlayer[i]. origin, 0.0f, WHITE);
         }
-        for(int i = numberOfPlayedCards - 3; i <= numberOfPlayedCards; i++){
-            // Draw the cards from the second index from the back to the last next to each other without overlap
-            playedCardsOfPlayer[i].outline.x = i * playedCardsOfPlayer[i].outline.width - (numberOfPlayedCards - 3)*50.0f;
+
+        // Draw the last x number of cards without overlap
+        for(int i = numberOfPlayedCards - 1; i <= numberOfPlayedCards; i++){
+            // This statement prevents the drawing of the first card twice
+            if(i == 0) continue;
+            playedCardsOfPlayer[i].outline.x = playedCardsOfPlayer[i-1].outline.x + widthOfCards;
             playedCardsOfPlayer[i].outline.y = (screenHeight / 2) - (heightOfCards / 2);
             DrawTexturePro(playedCardsOfPlayer[i].texture, playedCardsOfPlayer[i].source, playedCardsOfPlayer[i].outline, playedCardsOfPlayer[i]. origin, 0.0f, WHITE);
         }
