@@ -266,6 +266,8 @@ void initializeCards(Card *cardsOfPlayer, int numberOfCards, Card *playedCardsOf
     for(int rarity = 1; rarity <= 5; rarity++){
         for(int cast = 1; cast <= 4; cast++){
             cardCollection[index].texture = LoadTexture(TextFormat("images/cards/card_%d_%d.png", rarity, cast));
+            cardCollection[index].rarity = rarity;
+            cardCollection[index].cast = cast;
             //cardCollection[index].texture = LoadTexture("images/cards/image_card0.png");
             index++;
         }
