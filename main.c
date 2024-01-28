@@ -101,6 +101,8 @@ int main(void)
     
     // Rarity 1: gray, 2: green, 3: blue, 4: purple, 5: gold, 6: hero
     // Casts: 1: ghost, 2: knight, 3: ork, 4: wizard, 5: hero
+    Texture2D logoScreenTexture = LoadTexture("images/misc/loading_screen.png");
+
     // Setting up variables for the background
     Texture2D backgroundTexture = LoadTexture("images/background_map/background.png");
     Rectangle backgroundSrcRec = (Rectangle){
@@ -198,8 +200,7 @@ int main(void)
                 case LOGO:
                 {
                     //  TODO: Draw LOGO screen here!
-                    DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
-                    DrawText("WAIT for 2 SECONDS...", 290, 220, 20, GRAY);
+                    DrawTexture(logoScreenTexture, 0, 0, WHITE);
 
                 } break;
                 case TITLE:
@@ -250,7 +251,14 @@ int main(void)
     for (int i = 0; i < numberOfCards; i++)
     {
         UnloadTexture(cardsOfPlayer[i].texture);
+        UnloadTexture(playedCardsOfPlayer[i].texture);
     }
+    for(int i = 0; i < 21; i++){
+        UnloadTexture(cardCollection[i].texture);
+    }
+    UnloadTexture(logoScreenTexture);
+    UnloadTexture(mapTexture);
+    UnloadTexture(backgroundTexture);
     
     UnloadMusicStream(music);          // Unload music stream buffers from RAM
     CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
