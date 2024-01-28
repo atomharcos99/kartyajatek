@@ -251,7 +251,14 @@ int main(void)
     for (int i = 0; i < numberOfCards; i++)
     {
         UnloadTexture(cardsOfPlayer[i].texture);
+        UnloadTexture(playedCardsOfPlayer[i].texture);
     }
+    for(int i = 0; i < 21; i++){
+        UnloadTexture(cardCollection[i].texture);
+    }
+    UnloadTexture(logoScreenTexture);
+    UnloadTexture(mapTexture);
+    UnloadTexture(backgroundTexture);
     
     UnloadMusicStream(music);          // Unload music stream buffers from RAM
     CloseAudioDevice();     // Close audio device (music streaming is automatically stopped)
