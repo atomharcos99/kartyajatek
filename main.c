@@ -317,7 +317,8 @@ void initializeCards(Card *cardsOfPlayer, int numberOfCards, Card *playedCardsOf
 
 void randomSelectDeckCards(Card *cardsOfPlayer, int numberOfCards){
     for(int i = 0; i < numberOfCards; i++){
-        int randomIndex = rand() % 16;
+        // The rarest card it can draw is blue
+        int randomIndex = rand() % 12;
         cardsOfPlayer[i] = cardCollection[randomIndex];
     }
 }
