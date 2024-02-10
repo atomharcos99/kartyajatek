@@ -51,12 +51,14 @@ void initializeCards(Card *, Card *, int, Card *);
 void setCastProperties();
 void randomSelectDeckCards(Card *, Card *, int);
 void resetCardPositionAndSize(Card *, int);
-int drawPlayerHand(Card *, int); // Maybe use variable names here to make the code different?
-bool drawHoverOverCards(Card, float);
+int drawPlayerHand(Card *, int, bool *); // Maybe use variable names here to make the code different?
+bool drawHoverOverCards(Card, float, bool *);
 void reorganizeCardsInHand(Card *, int);
 void drawPlayedCards(Card *, int);
 void displayCardProperties(Card);
 void displayComputersCards(Card *, int);
+int computerMoves(Card *, int, bool *);
+void compareScores(int *, int *, Card *, Card *, int);
 
 int main(void)
 {
@@ -71,6 +73,7 @@ int main(void)
 
     GameScreen currentScreen = LOGO;
     Map map;
+    bool playerRound = false;
     // Generate a random number for the map selection 
     int randomNumber = rand() % 4 + 1;
     Texture2D mapTexture;
@@ -107,6 +110,8 @@ int main(void)
 
     const int numberOfCards = 8;
     int numberOfCardsInPlayerHand = 8;
+    // These variables will be compared for the final result
+    int scoreOfPlayer = 0, scoreOfComputer = 0;
     
     // Rarity 1: gray, 2: green, 3: blue, 4: purple, 5: gold, 6: hero
     // Casts: 1: ghost, 2: knight, 3: ork, 4: wizard, 5: hero
@@ -135,7 +140,7 @@ int main(void)
     Music music = LoadMusicStream("audio/background_music.mp3");
 
     Card cardsOfPlayer[numberOfCards], cardsOfComputer[numberOfCards];
-    Card playedCardsOfPlayer[numberOfCards];
+    Card playedCardsOfPlayer[2*numberOfCards];
     int numberOfPlayedCards = -1;
 
     initializeCards(cardsOfPlayer, cardsOfComputer, numberOfCards, playedCardsOfPlayer);
@@ -223,8 +228,16 @@ int main(void)
                     // TODO: Draw the hand of the player with this function
                     DrawTexturePro(backgroundTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
                     DrawTexturePro(mapTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
-                    displayComputersCards(cardsOfComputer, numberOfCards);
-                    int selected_card = drawPlayerHand(cardsOfPlayer, numberOfCardsInPlayerHand);
+                    displayComputersCards(cardsOfComputer, numberOfCards); // DEBUG PURPOSES
+                    // The computer selects a card (index)
+                    int selected_card_computer = computerMoves(cardsOfComputer, numberOfCards, &playerRound);
+                    if(selected_card_computer > -1){
+                        // Move that card to the played card pile
+                        numberOfPlayedCards++;
+                        playedCardsOfPlayer[numberOfPlayedCards] = cardsOfComputer[selected_card_computer];
+                        playerRound = true;
+                    }
+                    int selected_card = drawPlayerHand(cardsOfPlayer, numberOfCardsInPlayerHand, &playerRound);
                     if(selected_card > -1){
                         // If the selected cards was clicked, decrease the value of the number of cards in the player's hand
                         numberOfCardsInPlayerHand--;
@@ -235,6 +248,7 @@ int main(void)
                         reorganizeCardsInHand(cardsOfPlayer, numberOfCards);
                     }
                     drawPlayedCards(playedCardsOfPlayer, numberOfPlayedCards);
+                    compareScores(&scoreOfPlayer, &scoreOfComputer, cardsOfPlayer, cardsOfComputer, numberOfCards);
                 } break;
                 case ENDING:
                 {
@@ -502,8 +516,11 @@ void displayComputersCards(Card *cardsOfComputer, int numberOfCards){
     // FOR DEBUG PURPOSES
     // Draw the computer's cards
     for(int i = 0; i < numberOfCards; i++){
-        cardsOfComputer[i].outline.y = 0.0f;
-        cardsOfComputer[i].outline.x = (float) i * widthOfCards + 500.0f;
+        // Skip played cards
+        if(cardsOfComputer[i].played) continue;
+        
+        cardsOfComputer[i].outline.y = 0.0f + cardsOfComputer[i].outline.height;
+        cardsOfComputer[i].outline.x = (float) i * widthOfCards;
         DrawTexturePro(cardsOfComputer[i].texture, cardsOfComputer[i].source, cardsOfComputer[i].outline, cardsOfComputer[i].origin, 0.0f, WHITE);
     }
 }
@@ -540,7 +557,7 @@ void resetCardPositionAndSize(Card *cardsOfPlayer, int numberOfCards){
     }
 }
 
-int drawPlayerHand(Card *cardsOfPlayer, int numberOfCardsInPlayerHand){
+int drawPlayerHand(Card *cardsOfPlayer, int numberOfCardsInPlayerHand, bool *playerRound){
     float shiftOfCardsInDeck = 0.7f; // percentage
     float rotation = 0.0f, shiftToCorrect = 0.0f; // this variable needed to correctly arrange the right-top corner of the cards on the right side
     int shiftUp = 20.0f;
@@ -591,7 +608,7 @@ int drawPlayerHand(Card *cardsOfPlayer, int numberOfCardsInPlayerHand){
     }
     // Drawing the selected (hovered) card
     if(markedCardIndex > -1) {
-        if(drawHoverOverCards(cardsOfPlayer[markedCardIndex], markedCardRotation)){
+        if(drawHoverOverCards(cardsOfPlayer[markedCardIndex], markedCardRotation, playerRound)){
             // Saving the index to return later (since the markedCardIndex variable will be reseted before returning a value)
             int indexToReturn = markedCardIndex;
             // If the selected card was clicked on, set the flag 
@@ -604,7 +621,7 @@ int drawPlayerHand(Card *cardsOfPlayer, int numberOfCardsInPlayerHand){
     return -1;
 }
 
-bool drawHoverOverCards(Card cardToDraw, float rotation){
+bool drawHoverOverCards(Card cardToDraw, float rotation, bool *playerRound){
     cardToDraw.outline.x -= 15.0f;
     cardToDraw.outline.y -= 100.0f;
     cardToDraw.outline.width = 1.4f * widthOfCards;
@@ -612,8 +629,9 @@ bool drawHoverOverCards(Card cardToDraw, float rotation){
     DrawTexturePro(cardToDraw.texture, cardToDraw.source, cardToDraw.outline, cardToDraw.origin, rotation, WHITE);
     // THIS IS ONLY NEEDED FOR DEBUG PURPOSES
     displayCardProperties(cardToDraw);
-    // If the player presses the left mouse button while the card is selected, the card is played
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    // If the player presses the left mouse button while the card is selected and it's the player's round, the card is played
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && *playerRound) {
+        *playerRound = false;
         return true;
     }
     return false;
@@ -635,8 +653,8 @@ void drawPlayedCards(Card *playedCardsOfPlayer, int numberOfPlayedCards){
     int shift = 0;
     // Check if the player has played any card
     if(numberOfPlayedCards > -1){
-        // Draw the first card
-        playedCardsOfPlayer[0].outline.x = (0 * playedCardsOfPlayer[0].outline.width);
+        // Draw the first card (shift it to the right by the size of three cards to arrange the pile in the middle)
+        playedCardsOfPlayer[0].outline.x = (3 * playedCardsOfPlayer[0].outline.width);
         playedCardsOfPlayer[0].outline.y = (screenHeight / 2) - (heightOfCards / 2);
         DrawTexturePro(playedCardsOfPlayer[0].texture, playedCardsOfPlayer[0].source, playedCardsOfPlayer[0].outline, playedCardsOfPlayer[0]. origin, 0.0f, WHITE);
 
@@ -659,4 +677,72 @@ void drawPlayedCards(Card *playedCardsOfPlayer, int numberOfPlayedCards){
             DrawTexturePro(playedCardsOfPlayer[i].texture, playedCardsOfPlayer[i].source, playedCardsOfPlayer[i].outline, playedCardsOfPlayer[i]. origin, 0.0f, WHITE);
         }
     }
+}
+
+int computerMoves(Card *cardsOfComputer, int numberOfCards, bool *playerRound){
+    // If's not the computer's round
+    if(*playerRound) return -1;
+    // Temporarily the computer just selects the first unplayed card
+    for(int i = 0; i < numberOfCards; i++){
+        if(!cardsOfComputer[i].played){
+            cardsOfComputer[i].played = true;
+            return i;
+        }
+    }
+    return -1;
+}
+
+void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer, Card *cardsOfComputer, int numberOfCards){
+    int playerStrength = 0, playerFire = 0, playerMagic = 0, playerDefence = 0, playerFireDefence = 0, playerMagicDefense = 0;
+    int computerStrength = 0, computerFire = 0, computerMagic = 0, computerDefence = 0, computerFireDefence = 0, computerMagicDefense = 0;
+ 
+    for(int i = 0; i < numberOfCards; i++){
+        if(cardsOfPlayer[i].played){
+            // Calculating player's stats
+            playerStrength += cardsOfPlayer[i].strength;
+            playerFire += cardsOfPlayer[i].fire;
+            playerMagic += cardsOfPlayer[i].magic;
+            playerDefence += cardsOfPlayer[i].defence;
+            playerFireDefence += cardsOfPlayer[i].fire_defence;
+            playerMagicDefense += cardsOfPlayer[i].magic_defence;
+        }
+        if(cardsOfComputer[i].played){
+            // Calculating computer's stats
+            computerStrength += cardsOfComputer[i].strength;
+            computerFire += cardsOfComputer[i].fire;
+            computerMagic += cardsOfComputer[i].magic;
+            computerDefence += cardsOfComputer[i].defence;
+            computerFireDefence += cardsOfComputer[i].fire_defence;
+            computerMagicDefense += cardsOfComputer[i].magic_defence;
+        }
+    }
+
+    playerStrength -= computerDefence;
+    playerFire -= computerFireDefence;
+    playerMagic -= computerMagicDefense;
+    
+    computerStrength -= playerDefence;
+    computerFire -= playerFireDefence;
+    computerMagic -= playerMagicDefense;
+
+    *scoreOfPlayer = playerStrength + playerFire + playerMagic;
+    *scoreOfComputer = computerStrength + computerFire + computerMagic;
+
+    // FOR DEBUG PURPOSES
+    DrawText(TextFormat("%d", playerStrength), 0, 500, 25, RED);
+    DrawText(TextFormat("%d", playerFire), 0, 550, 25, RED);
+    DrawText(TextFormat("%d", playerMagic), 0, 570, 25, RED);
+    DrawText(TextFormat("%d", playerDefence), 0, 590, 25, RED);
+    DrawText(TextFormat("%d", playerFireDefence), 0, 610, 25, RED);
+    DrawText(TextFormat("%d", playerMagicDefense), 0, 630, 25, RED);
+
+    DrawText(TextFormat("%d", computerStrength), 1900, 500, 25, RED);
+    DrawText(TextFormat("%d", computerFire), 1900, 550, 25, RED);
+    DrawText(TextFormat("%d", computerMagic), 1900, 570, 25, RED);
+    DrawText(TextFormat("%d", computerDefence), 1900, 590, 25, RED);
+    DrawText(TextFormat("%d", computerFireDefence), 1900, 610, 25, RED);
+    DrawText(TextFormat("%d", computerMagicDefense), 1900, 630, 25, RED);
+
+    DrawText(TextFormat("%d", *scoreOfPlayer), 570, 10, 50, YELLOW);
+    DrawText(TextFormat("%d", *scoreOfComputer), 1020, 10, 50, YELLOW);
 }
