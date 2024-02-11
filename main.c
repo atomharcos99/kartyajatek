@@ -65,7 +65,7 @@ int main(void)
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
-    ToggleFullscreen();
+    //ToggleFullscreen();
     InitAudioDevice();
 
     // Initializing the rand function
@@ -182,7 +182,7 @@ int main(void)
             case GAMEPLAY:
             {
                 // TODO: Update GAMEPLAY screen variables here!
-                PlayMusicStream(music);
+                //PlayMusicStream(music);
                 // Press enter to change to ENDING screen
                 // if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
                 // {
@@ -643,7 +643,10 @@ void reorganizeCardsInHand(Card *cardsOfPlayer, int numberOfCards){
         if(cardsOfPlayer[i].played){
             // If found a played card, push each card from the index of the played card to one index to the left (so decrease their index by one)
             for(int j = i; j < numberOfCards-1; j++){
+                // Flip the indexes of the cards, so the played cards will be the last
+                Card temp = cardsOfPlayer[j];
                 cardsOfPlayer[j] = cardsOfPlayer[j+1];
+                cardsOfPlayer[j+1] = temp;
             }
         }
     }
