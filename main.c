@@ -59,6 +59,8 @@ void displayCardProperties(Card);
 void displayComputersCards(Card *, int);
 int computerMoves(Card *, int, bool *);
 void compareScores(int *, int *, Card *, Card *, int);
+int rarityPromotionCheck(Card *, int, Card *, int);
+void promoteCard(Card *, int, int);
 
 int main(void)
 {
@@ -231,14 +233,32 @@ int main(void)
                     displayComputersCards(cardsOfComputer, numberOfCards); // DEBUG PURPOSES
                     // The computer selects a card (index)
                     int selected_card_computer = computerMoves(cardsOfComputer, numberOfCards, &playerRound);
+                    // This variable will contain the number of consqutive same classes from the back
+                    int promotion;
+                    
                     if(selected_card_computer > -1){
+                        promotion = rarityPromotionCheck(cardsOfComputer, selected_card_computer, playedCardsOfPlayer, numberOfPlayedCards);
+                        // If the number of same classes next to each other is bigger than two..
+                        if(promotion > 2){
+                            // ...promote the last card
+                            promoteCard(cardsOfComputer, selected_card_computer, promotion);
+                        }
+
                         // Move that card to the played card pile
                         numberOfPlayedCards++;
                         playedCardsOfPlayer[numberOfPlayedCards] = cardsOfComputer[selected_card_computer];
                         playerRound = true;
                     }
+                    // The selected_card var will hold the index of the clicked card
                     int selected_card = drawPlayerHand(cardsOfPlayer, numberOfCardsInPlayerHand, &playerRound);
                     if(selected_card > -1){
+                        promotion = rarityPromotionCheck(cardsOfPlayer, selected_card, playedCardsOfPlayer, numberOfPlayedCards);
+                        // If the number of same classes next to each other is bigger than two..
+                        if(promotion > 2){
+                            // ...promote the last card
+                            promoteCard(cardsOfPlayer, selected_card, promotion);
+                        }
+
                         // If the selected cards was clicked, decrease the value of the number of cards in the player's hand
                         numberOfCardsInPlayerHand--;
                         // Move the played card to the played card array
@@ -247,6 +267,9 @@ int main(void)
                         // Reorganize cards in player's hand
                         reorganizeCardsInHand(cardsOfPlayer, numberOfCards);
                     }
+                    // PROMOTION DEBUG CHECK
+                    DrawText(TextFormat("%d", promotion), 100, 100, 60, PURPLE);
+                    
                     drawPlayedCards(playedCardsOfPlayer, numberOfPlayedCards);
                     compareScores(&scoreOfPlayer, &scoreOfComputer, cardsOfPlayer, cardsOfComputer, numberOfCards);
                 } break;
@@ -748,4 +771,45 @@ void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer
 
     DrawText(TextFormat("%d", *scoreOfPlayer), 570, 10, 50, YELLOW);
     DrawText(TextFormat("%d", *scoreOfComputer), 1020, 10, 50, YELLOW);
+}
+
+int rarityPromotionCheck(Card * deck, int index, Card * playedCards, int numberOfPlayedCards){
+    // Count how many cards have the same classes next to each other in the played cards deck
+    int counter = 1;
+    // If no cards were played return
+    if(numberOfPlayedCards < 0) return 0;
+    // Check the played cards deck from the back
+    for(int i = numberOfPlayedCards; 0 <= numberOfPlayedCards; i--){
+        if(playedCards[i].cast == deck[index].cast) counter++;
+        else break;
+    }
+    return counter;
+}
+
+void promoteCard(Card *deck, int selected_index, int promotion){
+    Card futureCard;
+    // int choosenCard = -1;
+    // // Search for the selected card in the master card collection
+    // for(int i = 0; i < 22; i++){
+    //     if(cardCollection[i].cast == deck[selected_index].cast && cardCollection[i].rarity == deck[selected_index].rarity){
+    //         choosenCard = i;
+    //         break;
+    //     }
+    // }
+    // // Check if a card was selected
+    // if(choosenCard < 0) exit(1);
+    // // Shift the position of the card (this is how we promote). Each card of a higher rarity has an index that is bigger by 4 from the next most inferior rarity
+    // if(choosenCard + 4 < 21) futureCard = cardCollection[choosenCard + 4];
+    // else futureCard = cardCollection[21];
+
+    // THIS IS BUGGY, THE PREVIOUS VERSION WORK BETTER
+    if(deck[selected_index].rarity + (promotion - 1) < 6) 
+        deck[selected_index].rarity + (promotion - 1);
+    else 
+        deck[selected_index].rarity = 6;
+
+    // Copy the position of the original card
+    futureCard.outline = deck[selected_index].outline;
+    futureCard.played = deck[selected_index].played;
+    deck[selected_index] = futureCard;
 }
