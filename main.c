@@ -788,25 +788,20 @@ int rarityPromotionCheck(Card * deck, int index, Card * playedCards, int numberO
 
 void promoteCard(Card *deck, int selected_index, int promotion){
     Card futureCard;
-    // int choosenCard = -1;
-    // // Search for the selected card in the master card collection
-    // for(int i = 0; i < 22; i++){
-    //     if(cardCollection[i].cast == deck[selected_index].cast && cardCollection[i].rarity == deck[selected_index].rarity){
-    //         choosenCard = i;
-    //         break;
-    //     }
-    // }
-    // // Check if a card was selected
-    // if(choosenCard < 0) exit(1);
-    // // Shift the position of the card (this is how we promote). Each card of a higher rarity has an index that is bigger by 4 from the next most inferior rarity
-    // if(choosenCard + 4 < 21) futureCard = cardCollection[choosenCard + 4];
-    // else futureCard = cardCollection[21];
-
-    // THIS IS BUGGY, THE PREVIOUS VERSION WORK BETTER
-    if(deck[selected_index].rarity + (promotion - 1) < 6) 
-        deck[selected_index].rarity + (promotion - 1);
-    else 
-        deck[selected_index].rarity = 6;
+    int choosenCard = -1;
+    // Search for the selected card in the master card collection
+    for(int i = 0; i < 22; i++){
+        if(cardCollection[i].cast == deck[selected_index].cast && cardCollection[i].rarity == deck[selected_index].rarity){
+            choosenCard = i;
+            break;
+        }
+    }
+    // Check if a card was selected
+    if(choosenCard < 0) exit(1);
+    // Shift the position of the card (this is how we promote: if three cards from the same class are next to each other, promote the last card by one; if four cards from the same class are next to each other, promoted the last card by two, etc...). 
+    // Each class of a higher rarity has an index that is bigger by 4 from the next most inferior rarity
+    if(choosenCard + 4 * (promotion - 2) < 21) futureCard = cardCollection[choosenCard + 4 * (promotion - 2)];
+    else futureCard = cardCollection[21];
 
     // Copy the position of the original card
     futureCard.outline = deck[selected_index].outline;
