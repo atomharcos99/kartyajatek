@@ -61,6 +61,7 @@ int computerMoves(Card *, int, bool *);
 void compareScores(int *, int *, Card *, Card *, int);
 int rarityPromotionCheck(Card *, int, Card *, int);
 void promoteCard(Card *, int, int);
+void applyMapEffect(Card *, Card *, int, Map);
 
 int main(void)
 {
@@ -147,6 +148,7 @@ int main(void)
 
     initializeCards(cardsOfPlayer, cardsOfComputer, numberOfCards, playedCardsOfPlayer);
     randomSelectDeckCards(cardsOfPlayer, cardsOfComputer, numberOfCards);
+    applyMapEffect(cardsOfPlayer, cardsOfComputer, numberOfCards, map);
 
     SetTargetFPS(60);               // Set desired framerate (frames-per-second)
     //--------------------------------------------------------------------------------------
@@ -231,7 +233,7 @@ int main(void)
                     DrawTexturePro(backgroundTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
                     DrawTexturePro(mapTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
                     displayComputersCards(cardsOfComputer, numberOfCards); // DEBUG PURPOSES
-                    // The computer selects a card (index)
+                    // The computer selects a card (index)applyMapEffect
                     int selected_card_computer = computerMoves(cardsOfComputer, numberOfCards, &playerRound);
                     // This variable will contain the number of consqutive same classes from the back
                     int promotion;
@@ -807,4 +809,58 @@ void promoteCard(Card *deck, int selected_index, int promotion){
     futureCard.outline = deck[selected_index].outline;
     futureCard.played = deck[selected_index].played;
     deck[selected_index] = futureCard;
+}
+
+void applyMapEffect(Card *cardsOfPlayer, Card *cardsOfComputer, int numberOfCards, Map map){
+    // Applying the passive properties of the map (only if the given property is bigger than 5)
+    for(int i = 0; i < numberOfCards; i++){
+        switch (map){
+            case CASTLE:
+                // Player
+                if(cardsOfPlayer[i].strength >= 5) cardsOfPlayer[i].strength += 3;
+                if(cardsOfPlayer[i].fire >= 5) cardsOfPlayer[i].fire += 1;
+                if(cardsOfPlayer[i].magic >= 5) cardsOfPlayer[i].magic -= 3;
+                // Computer
+                if(cardsOfComputer[i].strength >= 5) cardsOfComputer[i].strength += 3;
+                if(cardsOfComputer[i].fire >= 5) cardsOfComputer[i].fire += 1;
+                if(cardsOfComputer[i].magic >= 5) cardsOfComputer[i].magic -= 3;
+                break;
+
+            case CAVE:
+                // Player
+                if(cardsOfPlayer[i].strength >= 5) cardsOfPlayer[i].strength += 3;
+                if(cardsOfPlayer[i].fire >= 5) cardsOfPlayer[i].fire -= 1;
+                if(cardsOfPlayer[i].magic >= 5) cardsOfPlayer[i].magic -= 1;
+                // Computer
+                if(cardsOfComputer[i].strength >= 5) cardsOfComputer[i].strength += 3;
+                if(cardsOfComputer[i].fire >= 5) cardsOfComputer[i].fire -= 1;
+                if(cardsOfComputer[i].magic >= 5) cardsOfComputer[i].magic -= 1;
+                break;
+
+            case HELL:
+                // Player
+                if(cardsOfPlayer[i].strength >= 5) cardsOfPlayer[i].strength -= 3;
+                if(cardsOfPlayer[i].fire >= 5) cardsOfPlayer[i].fire += 4;
+                if(cardsOfPlayer[i].magic >= 5) cardsOfPlayer[i].magic += 1;
+                // Computer
+                if(cardsOfComputer[i].strength >= 5) cardsOfComputer[i].strength -= 3;
+                if(cardsOfComputer[i].fire >= 5) cardsOfComputer[i].fire += 4;
+                if(cardsOfComputer[i].magic >= 5) cardsOfComputer[i].magic += 1;
+                break;
+
+            case SWAMP:
+                // Player
+                if(cardsOfPlayer[i].strength >= 5) cardsOfPlayer[i].strength -= 2;
+                if(cardsOfPlayer[i].fire >= 5) cardsOfPlayer[i].fire -= 3;
+                if(cardsOfPlayer[i].magic >= 5) cardsOfPlayer[i].magic += 3;
+                // Computer
+                if(cardsOfComputer[i].strength >= 5) cardsOfComputer[i].strength -= 2;
+                if(cardsOfComputer[i].fire >= 5) cardsOfComputer[i].fire -= 3;
+                if(cardsOfComputer[i].magic >= 5) cardsOfComputer[i].magic += 3;
+                break;
+            
+            default:
+                break;
+        }
+    }
 }
