@@ -808,5 +808,3 @@ void promoteCard(Card *deck, int selected_index, int promotion){
     futureCard.played = deck[selected_index].played;
     deck[selected_index] = futureCard;
 }
-
-asdasd
