@@ -1,4 +1,6 @@
 #include "raylib.h"
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -47,6 +49,8 @@ const float heightOfCards = 214.0f;
 const float widthOfCards = 131.0f;
 Card cardCollection[21]; // This variable contains all cards
 
+bool music_play = true;
+
 void initializeCards(Card *, Card *, int, Card *);
 void setCastProperties();
 void randomSelectDeckCards(Card *, Card *, int);
@@ -67,9 +71,15 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic screen manager");
+    InitWindow(screenWidth, screenHeight, "Generic Fantasy Game - Benkovszky László");
     //ToggleFullscreen();
     InitAudioDevice();
+    // Initialize RayGUI style
+    GuiLoadStyle("dark/style_dark.rgs");
+    // Slightly modifying the default font size
+    Font font = GetFontDefault();
+    font.baseSize = 3;
+    GuiSetFont(font);
 
     // Initializing the rand function
     srand(time(NULL));
@@ -177,16 +187,14 @@ int main(void)
             {
                 // TODO: Update TITLE screen variables here!
 
-                // Press enter to change to GAMEPLAY screen
-                if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-                {
-                    currentScreen = GAMEPLAY;
-                }
+                if(music_play) PlayMusicStream(music);
+                else PauseMusicStream(music);
             } break;
             case GAMEPLAY:
             {
+                if(music_play) PlayMusicStream(music);
+                else PauseMusicStream(music);
                 // TODO: Update GAMEPLAY screen variables here!
-                //PlayMusicStream(music);
                 // Press enter to change to ENDING screen
                 // if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
                 // {
@@ -224,7 +232,11 @@ int main(void)
                 case TITLE:
                 {
                     // TODO: Draw TITLE screen here!
+                    bool *boolpoint = &music_play;
                     DrawTexturePro(menuTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
+                    if(GuiButton((Rectangle){(screenWidth/2) - 120, 600, 300, 120}, "S T A R T")) currentScreen = GAMEPLAY;
+                    if(GuiButton((Rectangle){(screenWidth/2) - 120, 800, 300, 120}, "E X I T")) CloseWindow();
+                    if(GuiCheckBox((Rectangle){0, screenHeight - 80, 150, 75}, "Z E N E", boolpoint));
 
                 } break;
                 case GAMEPLAY:
@@ -274,6 +286,9 @@ int main(void)
                     
                     drawPlayedCards(playedCardsOfPlayer, numberOfPlayedCards);
                     compareScores(&scoreOfPlayer, &scoreOfComputer, cardsOfPlayer, cardsOfComputer, numberOfCards);
+                    
+                    bool *boolpoint = &music_play;
+                    if(GuiCheckBox((Rectangle){0, screenHeight - 80, 150, 75}, "Z E N E", boolpoint));
                 } break;
                 case ENDING:
                 {
@@ -284,6 +299,7 @@ int main(void)
 
                 } break;
                 default: break;
+                
             }
 
         EndDrawing();
