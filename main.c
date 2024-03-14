@@ -61,11 +61,12 @@ void reorganizeCardsInHand(Card *, int);
 void drawPlayedCards(Card *, int);
 void displayCardProperties(Card);
 void displayComputersCards(Card *, int);
-int computerMoves(Card *, int, bool *);
-void compareScores(int *, int *, Card *, Card *, int);
+int computerMoves(Card *, Card *, int, int, bool *);
+void compareScores(int *, int *, Card *, Card *, int, GameScreen *);
 int rarityPromotionCheck(Card *, int, Card *, int);
 void promoteCard(Card *, int, int);
 void applyMapEffect(Card *, Card *, int, Map);
+void drawEndScreen(int, int);
 
 int main(void)
 {
@@ -89,7 +90,7 @@ int main(void)
     bool playerRound = false;
     // Generate a random number for the map selection 
     int randomNumber = rand() % 4 + 1;
-    Texture2D mapTexture;
+    Texture2D mapTexture, resultBanner;
     // Select the map according to the random number generated
     switch (randomNumber)
     {
@@ -149,6 +150,8 @@ int main(void)
         .y = 0.0f
     };
 
+    Rectangle resultBannerSrc, resultBannerRec;
+
     // Setting up background music
     Music music = LoadMusicStream("audio/background_music.mp3");
 
@@ -203,7 +206,24 @@ int main(void)
             } break;
             case ENDING:
             {
-                // TODO: Update ENDING screen variables here!
+                // Update the resultBanner according to the result of the match
+                if(scoreOfPlayer < scoreOfComputer) resultBanner = LoadTexture("images/background_map/you_lost.png");
+                else if(scoreOfPlayer > scoreOfComputer) resultBanner = LoadTexture("images/background_map/you_won.png");
+                else LoadTexture("images/background_map/draw.png");
+
+                resultBannerRec = (Rectangle){
+                    .width = resultBanner.width,
+                    .height = resultBanner.height,
+                    .x = 0.0f,
+                    .y = 0.0f
+                };
+
+                resultBannerSrc = (Rectangle){
+                    .width = resultBanner.width,
+                    .height = resultBanner.height,
+                    .x = 0.0f,
+                    .y = 0.0f
+                };
 
                 // Press enter to return to TITLE screen
                 if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
@@ -246,7 +266,7 @@ int main(void)
                     DrawTexturePro(mapTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
                     displayComputersCards(cardsOfComputer, numberOfCards); // DEBUG PURPOSES
                     // The computer selects a card (index)applyMapEffect
-                    int selected_card_computer = computerMoves(cardsOfComputer, numberOfCards, &playerRound);
+                    int selected_card_computer = computerMoves(cardsOfComputer, playedCardsOfPlayer, numberOfPlayedCards, numberOfCards, &playerRound);
                     // This variable will contain the number of consqutive same classes from the back
                     int promotion;
                     
@@ -285,7 +305,7 @@ int main(void)
                     DrawText(TextFormat("%d", promotion), 100, 100, 60, PURPLE);
                     
                     drawPlayedCards(playedCardsOfPlayer, numberOfPlayedCards);
-                    compareScores(&scoreOfPlayer, &scoreOfComputer, cardsOfPlayer, cardsOfComputer, numberOfCards);
+                    compareScores(&scoreOfPlayer, &scoreOfComputer, cardsOfPlayer, cardsOfComputer, numberOfCards, &currentScreen);
                     
                     bool *boolpoint = &music_play;
                     if(GuiCheckBox((Rectangle){0, screenHeight - 80, 150, 75}, "Z E N E", boolpoint));
@@ -293,10 +313,11 @@ int main(void)
                 case ENDING:
                 {
                     // TODO: Draw ENDING screen here!
-                    DrawRectangle(0, 0, screenWidth, screenHeight, BLUE);
-                    DrawText("ENDING SCREEN", 20, 20, 40, DARKBLUE);
-                    DrawText("PRESS ENTER or TAP to RETURN to TITLE SCREEN", 120, 220, 20, DARKBLUE);
-
+                    DrawTexturePro(backgroundTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
+                    DrawTexturePro(mapTexture, backgroundSrcRec, backgroundDestRec, backgroundOrigin, 0.0f, WHITE);
+                    DrawText(TextFormat("%d", scoreOfPlayer), 570, 10, 50, YELLOW);
+                    DrawText(TextFormat("%d", scoreOfComputer), 1020, 10, 50, YELLOW);
+                    DrawTexturePro(resultBanner, resultBannerRec, resultBannerSrc, backgroundOrigin, 0.0f, WHITE);
                 } break;
                 default: break;
                 
@@ -723,23 +744,37 @@ void drawPlayedCards(Card *playedCardsOfPlayer, int numberOfPlayedCards){
     }
 }
 
-int computerMoves(Card *cardsOfComputer, int numberOfCards, bool *playerRound){
+int computerMoves(Card *cardsOfComputer, Card *playedCards, int numberOfPlayedCards, int numberOfCards, bool *playerRound){
     // If's not the computer's round
     if(*playerRound) return -1;
+    // If its the first round, simply play the first card
+    if(numberOfPlayedCards < 0){
+        cardsOfComputer[0].played = true;
+        return 0;
+    }
     // Temporarily the computer just selects the first unplayed card
+    for(int i = 0; i < numberOfCards; i++){
+        if(!cardsOfComputer[i].played && cardsOfComputer[i].cast == playedCards[numberOfPlayedCards].cast){
+            cardsOfComputer[i].played = true;
+            return i;
+        }
+    }
+    // If not match was found, just play the first unplayed card
     for(int i = 0; i < numberOfCards; i++){
         if(!cardsOfComputer[i].played){
             cardsOfComputer[i].played = true;
             return i;
         }
     }
+
     return -1;
 }
 
-void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer, Card *cardsOfComputer, int numberOfCards){
+void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer, Card *cardsOfComputer, int numberOfCards, GameScreen *currentScreen){
     int playerStrength = 0, playerFire = 0, playerMagic = 0, playerDefence = 0, playerFireDefence = 0, playerMagicDefense = 0;
     int computerStrength = 0, computerFire = 0, computerMagic = 0, computerDefence = 0, computerFireDefence = 0, computerMagicDefense = 0;
- 
+    bool matchIsOn = true;
+
     for(int i = 0; i < numberOfCards; i++){
         if(cardsOfPlayer[i].played){
             // Calculating player's stats
@@ -759,6 +794,17 @@ void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer
             computerFireDefence += cardsOfComputer[i].fire_defence;
             computerMagicDefense += cardsOfComputer[i].magic_defence;
         }
+    }
+
+    for(int i = 0; i < numberOfCards; i++){
+        if(!cardsOfPlayer[i].played || !cardsOfComputer[i].played){
+            // If any card is yet to be played, the match is on
+            matchIsOn = true;
+            break;
+        }
+        // If all the cards were played, the for loop did exited with the break, the match is over
+        matchIsOn = false;
+        if(!matchIsOn) *currentScreen = ENDING;
     }
 
     playerStrength -= computerDefence;
@@ -818,8 +864,8 @@ void promoteCard(Card *deck, int selected_index, int promotion){
     if(choosenCard < 0) exit(1);
     // Shift the position of the card (this is how we promote: if three cards from the same class are next to each other, promote the last card by one; if four cards from the same class are next to each other, promoted the last card by two, etc...). 
     // Each class of a higher rarity has an index that is bigger by 4 from the next most inferior rarity
-    if(choosenCard + 4 * (promotion - 2) < 21) futureCard = cardCollection[choosenCard + 4 * (promotion - 2)];
-    else futureCard = cardCollection[21];
+    if(choosenCard + 4 * (promotion - 2) < 20) futureCard = cardCollection[choosenCard + 4 * (promotion - 2)];
+    else futureCard = cardCollection[20];
 
     // Copy the position of the original card
     futureCard.outline = deck[selected_index].outline;
