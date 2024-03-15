@@ -34,9 +34,9 @@ typedef struct Card {
     int strength;
     int fire;
     int magic;
-    int defence;
-    int fire_defence;
-    int magic_defence;
+    int defense;
+    int fire_defense;
+    int magic_defense;
 } Card;
 
 //------------------------------------------------------------------------------------
@@ -414,154 +414,154 @@ void setCastProperties(){
     cardCollection[0].strength = 0;
     cardCollection[0].fire = 6;
     cardCollection[0].magic = 3;
-    cardCollection[0].defence = 0;
-    cardCollection[0].fire_defence = 6;
-    cardCollection[0].magic_defence = 1;
+    cardCollection[0].defense = 0;
+    cardCollection[0].fire_defense = 6;
+    cardCollection[0].magic_defense = 1;
     // Gray knight
     cardCollection[1].strength = 6;
     cardCollection[1].fire = 1;
     cardCollection[1].magic = 0;
-    cardCollection[1].defence = 6;
-    cardCollection[1].fire_defence = 1;
-    cardCollection[1].magic_defence = 0;
+    cardCollection[1].defense = 6;
+    cardCollection[1].fire_defense = 1;
+    cardCollection[1].magic_defense = 0;
     // Gray orc
     cardCollection[2].strength = 4;
     cardCollection[2].fire = 2;
     cardCollection[2].magic = 1;
-    cardCollection[2].defence = 4;
-    cardCollection[2].fire_defence = 0;
-    cardCollection[2].magic_defence = 1;
+    cardCollection[2].defense = 4;
+    cardCollection[2].fire_defense = 0;
+    cardCollection[2].magic_defense = 1;
     // Gray wizard
     cardCollection[3].strength = 0;
     cardCollection[3].fire = 3;
     cardCollection[3].magic = 6;
-    cardCollection[3].defence = 0;
-    cardCollection[3].fire_defence = 1;
-    cardCollection[3].magic_defence = 6;
+    cardCollection[3].defense = 0;
+    cardCollection[3].fire_defense = 1;
+    cardCollection[3].magic_defense = 6;
 
     // Green ghost
     cardCollection[4].strength = 0;
     cardCollection[4].fire = 7;
     cardCollection[4].magic = 4;
-    cardCollection[4].defence = 0;
-    cardCollection[4].fire_defence = 7;
-    cardCollection[4].magic_defence = 2;
+    cardCollection[4].defense = 0;
+    cardCollection[4].fire_defense = 7;
+    cardCollection[4].magic_defense = 2;
     // Green knight
     cardCollection[5].strength = 7;
     cardCollection[5].fire = 1;
     cardCollection[5].magic = 0;
-    cardCollection[5].defence = 7;
-    cardCollection[5].fire_defence = 1;
-    cardCollection[5].magic_defence = 0;
+    cardCollection[5].defense = 7;
+    cardCollection[5].fire_defense = 1;
+    cardCollection[5].magic_defense = 0;
     // Green orc
     cardCollection[6].strength = 5;
     cardCollection[6].fire = 3;
     cardCollection[6].magic = 2;
-    cardCollection[6].defence = 5;
-    cardCollection[6].fire_defence = 0;
-    cardCollection[6].magic_defence = 2;
+    cardCollection[6].defense = 5;
+    cardCollection[6].fire_defense = 0;
+    cardCollection[6].magic_defense = 2;
     // Green wizard
     cardCollection[7].strength = 0;
     cardCollection[7].fire = 4;
     cardCollection[7].magic = 7;
-    cardCollection[7].defence = 0;
-    cardCollection[7].fire_defence = 2;
-    cardCollection[7].magic_defence = 7;
+    cardCollection[7].defense = 0;
+    cardCollection[7].fire_defense = 2;
+    cardCollection[7].magic_defense = 7;
 
     // Blue ghost
     cardCollection[8].strength = 0;
     cardCollection[8].fire = 8;
     cardCollection[8].magic = 5;
-    cardCollection[8].defence = 0;
-    cardCollection[8].fire_defence = 8;
-    cardCollection[8].magic_defence = 2;
+    cardCollection[8].defense = 0;
+    cardCollection[8].fire_defense = 8;
+    cardCollection[8].magic_defense = 2;
     // Blue knight
     cardCollection[9].strength = 8;
     cardCollection[9].fire = 1;
     cardCollection[9].magic = 0;
-    cardCollection[9].defence = 8;
-    cardCollection[9].fire_defence = 1;
-    cardCollection[9].magic_defence = 0;
+    cardCollection[9].defense = 8;
+    cardCollection[9].fire_defense = 1;
+    cardCollection[9].magic_defense = 0;
     // Blue orc
     cardCollection[10].strength = 6;
     cardCollection[10].fire = 4;
     cardCollection[10].magic = 3;
-    cardCollection[10].defence = 6;
-    cardCollection[10].fire_defence = 0;
-    cardCollection[10].magic_defence = 3;
+    cardCollection[10].defense = 6;
+    cardCollection[10].fire_defense = 0;
+    cardCollection[10].magic_defense = 3;
     // Blue wizard
     cardCollection[11].strength = 0;
     cardCollection[11].fire = 5;
     cardCollection[11].magic = 8;
-    cardCollection[11].defence = 0;
-    cardCollection[11].fire_defence = 2;
-    cardCollection[11].magic_defence = 8;
+    cardCollection[11].defense = 0;
+    cardCollection[11].fire_defense = 2;
+    cardCollection[11].magic_defense = 8;
 
     // Purple ghost
     cardCollection[12].strength = 0;
     cardCollection[12].fire = 9;
     cardCollection[12].magic = 6;
-    cardCollection[12].defence = 0;
-    cardCollection[12].fire_defence = 9;
-    cardCollection[12].magic_defence = 3;
+    cardCollection[12].defense = 0;
+    cardCollection[12].fire_defense = 9;
+    cardCollection[12].magic_defense = 3;
     // Purple knight
     cardCollection[13].strength = 9;
     cardCollection[13].fire = 2;
     cardCollection[13].magic = 0;
-    cardCollection[13].defence = 9;
-    cardCollection[13].fire_defence = 2;
-    cardCollection[13].magic_defence = 1;
+    cardCollection[13].defense = 9;
+    cardCollection[13].fire_defense = 2;
+    cardCollection[13].magic_defense = 1;
     // Purple orc
     cardCollection[14].strength = 7;
     cardCollection[14].fire = 5;
     cardCollection[14].magic = 4;
-    cardCollection[14].defence = 7;
-    cardCollection[14].fire_defence = 1;
-    cardCollection[14].magic_defence = 4;
+    cardCollection[14].defense = 7;
+    cardCollection[14].fire_defense = 1;
+    cardCollection[14].magic_defense = 4;
     // Purple wizard
     cardCollection[15].strength = 0;
     cardCollection[15].fire = 6;
     cardCollection[15].magic = 9;
-    cardCollection[15].defence = 0;
-    cardCollection[15].fire_defence = 3;
-    cardCollection[15].magic_defence = 9;
+    cardCollection[15].defense = 0;
+    cardCollection[15].fire_defense = 3;
+    cardCollection[15].magic_defense = 9;
 
     // Gold ghost
     cardCollection[16].strength = 0;
     cardCollection[16].fire = 10;
     cardCollection[16].magic = 7;
-    cardCollection[16].defence = 0;
-    cardCollection[16].fire_defence = 10;
-    cardCollection[16].magic_defence = 3;
+    cardCollection[16].defense = 0;
+    cardCollection[16].fire_defense = 10;
+    cardCollection[16].magic_defense = 3;
     // Gold knight
     cardCollection[17].strength = 10;
     cardCollection[17].fire = 2;
     cardCollection[17].magic = 1;
-    cardCollection[17].defence = 10;
-    cardCollection[17].fire_defence = 2;
-    cardCollection[17].magic_defence = 2;
+    cardCollection[17].defense = 10;
+    cardCollection[17].fire_defense = 2;
+    cardCollection[17].magic_defense = 2;
     // Gold orc
     cardCollection[18].strength = 8;
     cardCollection[18].fire = 6;
     cardCollection[18].magic = 5;
-    cardCollection[18].defence = 8;
-    cardCollection[18].fire_defence = 2;
-    cardCollection[18].magic_defence = 5;
+    cardCollection[18].defense = 8;
+    cardCollection[18].fire_defense = 2;
+    cardCollection[18].magic_defense = 5;
     // Gold wizard
     cardCollection[19].strength = 0;
     cardCollection[19].fire = 7;
     cardCollection[19].magic = 10;
-    cardCollection[19].defence = 0;
-    cardCollection[19].fire_defence = 3;
-    cardCollection[19].magic_defence = 10;
+    cardCollection[19].defense = 0;
+    cardCollection[19].fire_defense = 3;
+    cardCollection[19].magic_defense = 10;
 
     // Hero
     cardCollection[20].strength = 10;
     cardCollection[20].fire = 10;
     cardCollection[20].magic = 10;
-    cardCollection[20].defence = 10;
-    cardCollection[20].fire_defence = 10;
-    cardCollection[20].magic_defence = 10;
+    cardCollection[20].defense = 10;
+    cardCollection[20].fire_defense = 10;
+    cardCollection[20].magic_defense = 10;
 }
 
 void displayCardProperties(Card cardToDisplay){
@@ -569,9 +569,9 @@ void displayCardProperties(Card cardToDisplay){
     DrawText(TextFormat("Strength: %d", cardToDisplay.strength), 0, 0, 30, RED);
     DrawText(TextFormat("Fire: %d", cardToDisplay.fire), 0, 30, 30, RED);
     DrawText(TextFormat("Magic: %d", cardToDisplay.magic), 0, 60, 30, RED);
-    DrawText(TextFormat("Defence: %d", cardToDisplay.defence), 0, 90, 30, RED);
-    DrawText(TextFormat("Fire defence: %d", cardToDisplay.fire_defence), 0, 120, 30, RED);
-    DrawText(TextFormat("Magic defence: %d", cardToDisplay.magic_defence), 0, 150, 30, RED);
+    DrawText(TextFormat("Defense: %d", cardToDisplay.defense), 0, 90, 30, RED);
+    DrawText(TextFormat("Fire defense: %d", cardToDisplay.fire_defense), 0, 120, 30, RED);
+    DrawText(TextFormat("Magic defense: %d", cardToDisplay.magic_defense), 0, 150, 30, RED);
 }
 
 void displayComputersCards(Card *cardsOfComputer, int numberOfCards){
@@ -771,8 +771,8 @@ int computerMoves(Card *cardsOfComputer, Card *playedCards, int numberOfPlayedCa
 }
 
 void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer, Card *cardsOfComputer, int numberOfCards, GameScreen *currentScreen){
-    int playerStrength = 0, playerFire = 0, playerMagic = 0, playerDefence = 0, playerFireDefence = 0, playerMagicDefense = 0;
-    int computerStrength = 0, computerFire = 0, computerMagic = 0, computerDefence = 0, computerFireDefence = 0, computerMagicDefense = 0;
+    int playerStrength = 0, playerFire = 0, playerMagic = 0, playerDefense = 0, playerFireDefense = 0, playerMagicDefense = 0;
+    int computerStrength = 0, computerFire = 0, computerMagic = 0, computerDefense = 0, computerFireDefense = 0, computerMagicDefense = 0;
     bool matchIsOn = true;
 
     for(int i = 0; i < numberOfCards; i++){
@@ -781,18 +781,18 @@ void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer
             playerStrength += cardsOfPlayer[i].strength;
             playerFire += cardsOfPlayer[i].fire;
             playerMagic += cardsOfPlayer[i].magic;
-            playerDefence += cardsOfPlayer[i].defence;
-            playerFireDefence += cardsOfPlayer[i].fire_defence;
-            playerMagicDefense += cardsOfPlayer[i].magic_defence;
+            playerDefense += cardsOfPlayer[i].defense;
+            playerFireDefense += cardsOfPlayer[i].fire_defense;
+            playerMagicDefense += cardsOfPlayer[i].magic_defense;
         }
         if(cardsOfComputer[i].played){
             // Calculating computer's stats
             computerStrength += cardsOfComputer[i].strength;
             computerFire += cardsOfComputer[i].fire;
             computerMagic += cardsOfComputer[i].magic;
-            computerDefence += cardsOfComputer[i].defence;
-            computerFireDefence += cardsOfComputer[i].fire_defence;
-            computerMagicDefense += cardsOfComputer[i].magic_defence;
+            computerDefense += cardsOfComputer[i].defense;
+            computerFireDefense += cardsOfComputer[i].fire_defense;
+            computerMagicDefense += cardsOfComputer[i].magic_defense;
         }
     }
 
@@ -806,14 +806,15 @@ void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer
         matchIsOn = false;
         if(!matchIsOn) *currentScreen = ENDING;
     }
+    //setup current player values
+    playerStrength = computerDefense >= playerStrength ? 0 : playerStrength - computerDefense;
+    playerFire = computerFireDefense >= playerFire ? 0 : playerFire - computerFireDefense;
+    playerMagic = computerMagicDefense >= playerMagic ? 0 : playerMagic - computerMagicDefense;
 
-    playerStrength -= computerDefence;
-    playerFire -= computerFireDefence;
-    playerMagic -= computerMagicDefense;
-    
-    computerStrength -= playerDefence;
-    computerFire -= playerFireDefence;
-    computerMagic -= playerMagicDefense;
+    //setup current AI values
+    computerStrength = playerDefense >= computerStrength ? 0 : computerStrength - playerDefense;
+    computerFire = playerFireDefense >= computerFire ? 0 : computerFire-playerFireDefense;
+    computerMagic = playerMagicDefense >=computerMagic ? 0 : computerMagic-playerMagicDefense;
 
     *scoreOfPlayer = playerStrength + playerFire + playerMagic;
     *scoreOfComputer = computerStrength + computerFire + computerMagic;
@@ -822,15 +823,15 @@ void compareScores(int *scoreOfPlayer, int *scoreOfComputer, Card *cardsOfPlayer
     DrawText(TextFormat("%d", playerStrength), 0, 500, 25, RED);
     DrawText(TextFormat("%d", playerFire), 0, 550, 25, RED);
     DrawText(TextFormat("%d", playerMagic), 0, 570, 25, RED);
-    DrawText(TextFormat("%d", playerDefence), 0, 590, 25, RED);
-    DrawText(TextFormat("%d", playerFireDefence), 0, 610, 25, RED);
+    DrawText(TextFormat("%d", playerDefense), 0, 590, 25, RED);
+    DrawText(TextFormat("%d", playerFireDefense), 0, 610, 25, RED);
     DrawText(TextFormat("%d", playerMagicDefense), 0, 630, 25, RED);
 
     DrawText(TextFormat("%d", computerStrength), 1900, 500, 25, RED);
     DrawText(TextFormat("%d", computerFire), 1900, 550, 25, RED);
     DrawText(TextFormat("%d", computerMagic), 1900, 570, 25, RED);
-    DrawText(TextFormat("%d", computerDefence), 1900, 590, 25, RED);
-    DrawText(TextFormat("%d", computerFireDefence), 1900, 610, 25, RED);
+    DrawText(TextFormat("%d", computerDefense), 1900, 590, 25, RED);
+    DrawText(TextFormat("%d", computerFireDefense), 1900, 610, 25, RED);
     DrawText(TextFormat("%d", computerMagicDefense), 1900, 630, 25, RED);
 
     DrawText(TextFormat("%d", *scoreOfPlayer), 570, 10, 50, YELLOW);
